@@ -68,5 +68,13 @@ class MockLLMProvider(LLMProvider):
         
         raise ValueError("Unsupported schema for MockLLMProvider")
 
+    def generate_content(self, prompt: str) -> dict:
+        """
+        Synchronous fallback for generating simple content (like replies).
+        """
+        return {
+            "content": "Thanks for sharing! We appreciate the feedback."
+        }
+
 mock_llm_provider = MockLLMProvider()
 mock_provider = mock_llm_provider
