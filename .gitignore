@@ -1,6 +1,7 @@
 node_modules/
 .next/
 dist/
+out/
 build/
 *.log
 
@@ -13,7 +14,10 @@ htmlcov/
 venv/
 .venv/
 env/
+
 .env
+.env.*
+!.env.example
 
 .idea/
 .vscode/

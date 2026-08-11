@@ -17,46 +17,46 @@ depends_on = None
 
 def upgrade() -> None:
     # 1. Create ENUMs
-    role_enum = postgresql.ENUM('OWNER', 'ADMIN', 'EDITOR', 'ANALYST', 'VIEWER', name='role_enum')
+    role_enum = postgresql.ENUM('OWNER', 'ADMIN', 'EDITOR', 'ANALYST', 'VIEWER', name='role_enum', create_type=False)
     role_enum.create(op.get_bind(), checkfirst=True)
     
-    platform_enum = postgresql.ENUM('LINKEDIN', 'INSTAGRAM', 'FACEBOOK', 'X', name='platform_enum')
+    platform_enum = postgresql.ENUM('LINKEDIN', 'INSTAGRAM', 'FACEBOOK', 'X', name='platform_enum', create_type=False)
     platform_enum.create(op.get_bind(), checkfirst=True)
     
-    social_account_status_enum = postgresql.ENUM('CONNECTED', 'DISCONNECTED', 'EXPIRED', 'ERROR', name='social_account_status_enum')
+    social_account_status_enum = postgresql.ENUM('CONNECTED', 'DISCONNECTED', 'EXPIRED', 'ERROR', name='social_account_status_enum', create_type=False)
     social_account_status_enum.create(op.get_bind(), checkfirst=True)
     
-    campaign_status_enum = postgresql.ENUM('DRAFT', 'PLANNING', 'READY', 'ACTIVE', 'COMPLETED', 'ARCHIVED', name='campaign_status_enum')
+    campaign_status_enum = postgresql.ENUM('DRAFT', 'PLANNING', 'READY', 'ACTIVE', 'COMPLETED', 'ARCHIVED', name='campaign_status_enum', create_type=False)
     campaign_status_enum.create(op.get_bind(), checkfirst=True)
     
-    content_type_enum = postgresql.ENUM('SOCIAL', 'EMAIL', name='content_type_enum')
+    content_type_enum = postgresql.ENUM('SOCIAL', 'EMAIL', name='content_type_enum', create_type=False)
     content_type_enum.create(op.get_bind(), checkfirst=True)
     
-    content_status_enum = postgresql.ENUM('DRAFT', 'GENERATED', 'IN_REVIEW', 'APPROVED', 'REJECTED', 'SCHEDULED', 'PUBLISHED', name='content_status_enum')
+    content_status_enum = postgresql.ENUM('DRAFT', 'GENERATED', 'IN_REVIEW', 'APPROVED', 'REJECTED', 'SCHEDULED', 'PUBLISHED', name='content_status_enum', create_type=False)
     content_status_enum.create(op.get_bind(), checkfirst=True)
     
-    schedule_status_enum = postgresql.ENUM('SCHEDULED', 'PROCESSING', 'PUBLISHED', 'FAILED', 'CANCELLED', name='schedule_status_enum')
+    schedule_status_enum = postgresql.ENUM('SCHEDULED', 'PROCESSING', 'PUBLISHED', 'FAILED', 'CANCELLED', name='schedule_status_enum', create_type=False)
     schedule_status_enum.create(op.get_bind(), checkfirst=True)
     
-    published_post_status_enum = postgresql.ENUM('PUBLISHED', 'FAILED', 'DELETED', name='published_post_status_enum')
+    published_post_status_enum = postgresql.ENUM('PUBLISHED', 'FAILED', 'DELETED', name='published_post_status_enum', create_type=False)
     published_post_status_enum.create(op.get_bind(), checkfirst=True)
     
-    engagement_type_enum = postgresql.ENUM('COMMENT', 'MESSAGE', 'MENTION', name='engagement_type_enum')
+    engagement_type_enum = postgresql.ENUM('COMMENT', 'MESSAGE', 'MENTION', name='engagement_type_enum', create_type=False)
     engagement_type_enum.create(op.get_bind(), checkfirst=True)
     
-    sentiment_enum = postgresql.ENUM('POSITIVE', 'NEUTRAL', 'NEGATIVE', name='sentiment_enum')
+    sentiment_enum = postgresql.ENUM('POSITIVE', 'NEUTRAL', 'NEGATIVE', name='sentiment_enum', create_type=False)
     sentiment_enum.create(op.get_bind(), checkfirst=True)
     
-    engagement_category_enum = postgresql.ENUM('QUESTION', 'PRAISE', 'COMPLAINT', 'LEAD', 'SPAM', 'OTHER', name='engagement_category_enum')
+    engagement_category_enum = postgresql.ENUM('QUESTION', 'PRAISE', 'COMPLAINT', 'LEAD', 'SPAM', 'OTHER', name='engagement_category_enum', create_type=False)
     engagement_category_enum.create(op.get_bind(), checkfirst=True)
     
-    reply_status_enum = postgresql.ENUM('PENDING', 'AI_DRAFTED', 'APPROVED', 'REJECTED', 'REPLIED', 'ESCALATED', name='reply_status_enum')
+    reply_status_enum = postgresql.ENUM('PENDING', 'AI_DRAFTED', 'APPROVED', 'REJECTED', 'REPLIED', 'ESCALATED', name='reply_status_enum', create_type=False)
     reply_status_enum.create(op.get_bind(), checkfirst=True)
     
-    email_campaign_status_enum = postgresql.ENUM('DRAFT', 'READY', 'SCHEDULED', 'SENDING', 'SENT', 'FAILED', 'CANCELLED', name='email_campaign_status_enum')
+    email_campaign_status_enum = postgresql.ENUM('DRAFT', 'READY', 'SCHEDULED', 'SENDING', 'SENT', 'FAILED', 'CANCELLED', name='email_campaign_status_enum', create_type=False)
     email_campaign_status_enum.create(op.get_bind(), checkfirst=True)
     
-    insight_type_enum = postgresql.ENUM('PERFORMANCE', 'RECOMMENDATION', 'TREND', 'CONTENT', 'ENGAGEMENT', name='insight_type_enum')
+    insight_type_enum = postgresql.ENUM('PERFORMANCE', 'RECOMMENDATION', 'TREND', 'CONTENT', 'ENGAGEMENT', name='insight_type_enum', create_type=False)
     insight_type_enum.create(op.get_bind(), checkfirst=True)
 
     # 2. Add OrganizationMember table
@@ -271,4 +271,188 @@ def upgrade() -> None:
     op.drop_column('audit_logs', 'details')
 
 def downgrade() -> None:
-    pass
+    # AuditLog
+    op.add_column('audit_logs', sa.Column('details', postgresql.JSON(astext_type=sa.Text())))
+    op.drop_index('ix_audit_org_created_at', table_name='audit_logs')
+    op.drop_column('audit_logs', 'metadata')
+    op.drop_column('audit_logs', 'entity_id')
+    op.drop_column('audit_logs', 'entity_type')
+    op.alter_column('audit_logs', 'action', nullable=True)
+    op.alter_column('audit_logs', 'organization_id', nullable=True)
+
+    # AIInsight
+    op.add_column('ai_insights', sa.Column('actionable', sa.Boolean(), default=False))
+    op.add_column('ai_insights', sa.Column('insight_text', sa.Text()))
+    op.drop_column('ai_insights', 'metadata')
+    op.drop_column('ai_insights', 'confidence')
+    op.drop_column('ai_insights', 'recommendation')
+    op.drop_column('ai_insights', 'summary')
+    op.drop_column('ai_insights', 'title')
+    op.drop_column('ai_insights', 'type')
+    op.drop_column('ai_insights', 'campaign_id')
+    op.alter_column('ai_insights', 'organization_id', nullable=True)
+
+    # AnalyticsSnapshot
+    op.add_column('analytics_snapshots', sa.Column('timestamp', sa.DateTime(timezone=True)))
+    op.add_column('analytics_snapshots', sa.Column('metrics', postgresql.JSON(astext_type=sa.Text())))
+    op.drop_index('ix_analytics_platform_date', table_name='analytics_snapshots')
+    op.drop_column('analytics_snapshots', 'metadata')
+    op.drop_column('analytics_snapshots', 'engagement_rate')
+    op.drop_column('analytics_snapshots', 'followers')
+    op.drop_column('analytics_snapshots', 'clicks')
+    op.drop_column('analytics_snapshots', 'shares')
+    op.drop_column('analytics_snapshots', 'comments')
+    op.drop_column('analytics_snapshots', 'likes')
+    op.drop_column('analytics_snapshots', 'reach')
+    op.drop_column('analytics_snapshots', 'impressions')
+    op.drop_column('analytics_snapshots', 'snapshot_date')
+    op.drop_column('analytics_snapshots', 'platform')
+    op.drop_column('analytics_snapshots', 'published_post_id')
+    op.drop_column('analytics_snapshots', 'campaign_id')
+    op.alter_column('analytics_snapshots', 'organization_id', nullable=True)
+
+    # EmailCampaign
+    op.add_column('email_campaigns', sa.Column('body_html', sa.Text()))
+    op.drop_column('email_campaigns', 'sent_at')
+    op.drop_column('email_campaigns', 'scheduled_at')
+    op.drop_column('email_campaigns', 'status')
+    op.drop_column('email_campaigns', 'cta')
+    op.drop_column('email_campaigns', 'body')
+    op.drop_column('email_campaigns', 'preview_text')
+    op.drop_column('email_campaigns', 'name')
+    op.drop_column('email_campaigns', 'audience_id')
+    op.drop_column('email_campaigns', 'campaign_id')
+    op.alter_column('email_campaigns', 'organization_id', nullable=True)
+
+    # Audience
+    op.drop_column('audiences', 'contact_count')
+    op.execute("ALTER TABLE audiences ALTER COLUMN criteria TYPE JSON USING criteria::JSON")
+    op.drop_column('audiences', 'description')
+    op.alter_column('audiences', 'name', nullable=True)
+    op.alter_column('audiences', 'organization_id', nullable=True)
+
+    # EngagementItem
+    op.add_column('engagement_items', sa.Column('engagement_type', sa.String()))
+    op.drop_column('engagement_items', 'reply_status')
+    op.drop_column('engagement_items', 'ai_generated_reply')
+    op.drop_column('engagement_items', 'category')
+    op.drop_column('engagement_items', 'sentiment')
+    op.drop_column('engagement_items', 'author_external_id')
+    op.drop_column('engagement_items', 'author_name')
+    op.drop_column('engagement_items', 'type')
+    op.drop_column('engagement_items', 'external_id')
+    # Can't easily drop named foreign key if we didn't specify a name in upgrade
+    # op.drop_constraint(None, 'engagement_items', type_='foreignkey')
+    op.drop_column('engagement_items', 'social_account_id')
+    op.alter_column('engagement_items', 'published_post_id', nullable=True)
+
+    # PublishedPost
+    op.add_column('published_posts', sa.Column('platform_post_id', sa.String()))
+    op.drop_column('published_posts', 'metadata')
+    op.drop_column('published_posts', 'status')
+    op.drop_column('published_posts', 'published_at')
+    op.drop_index(op.f('ix_published_posts_external_post_id'), table_name='published_posts')
+    op.drop_column('published_posts', 'external_post_id')
+    # op.drop_constraint(None, 'published_posts', type_='foreignkey')
+    op.drop_column('published_posts', 'social_account_id')
+
+    # Schedule
+    op.add_column('schedules', sa.Column('publish_time', sa.DateTime(timezone=True)))
+    op.drop_column('schedules', 'status')
+    op.drop_column('schedules', 'timezone')
+    op.drop_column('schedules', 'scheduled_at')
+    op.alter_column('schedules', 'platform_variant_id', nullable=True)
+
+    # PlatformVariant
+    op.add_column('platform_variants', sa.Column('text', sa.Text()))
+    op.drop_column('platform_variants', 'status')
+    op.drop_column('platform_variants', 'ai_score')
+    op.drop_column('platform_variants', 'media_urls')
+    op.drop_column('platform_variants', 'hashtags')
+    op.drop_column('platform_variants', 'cta')
+    op.drop_column('platform_variants', 'caption')
+    op.drop_column('platform_variants', 'content')
+    op.execute("ALTER TABLE platform_variants ALTER COLUMN platform TYPE VARCHAR")
+    op.alter_column('platform_variants', 'platform', nullable=True)
+    op.alter_column('platform_variants', 'content_item_id', nullable=True)
+
+    # ContentItem
+    op.drop_column('content_items', 'created_by')
+    op.drop_column('content_items', 'ai_score')
+    op.execute("ALTER TABLE content_items ALTER COLUMN status TYPE VARCHAR")
+    op.alter_column('content_items', 'status', nullable=True)
+    op.drop_column('content_items', 'title')
+    op.drop_column('content_items', 'content_type')
+    op.alter_column('content_items', 'campaign_id', nullable=True)
+
+    # Campaign
+    op.drop_index('ix_campaigns_org_status', table_name='campaigns')
+    op.execute("ALTER TABLE campaigns ALTER COLUMN status TYPE VARCHAR")
+    op.alter_column('campaigns', 'status', nullable=True)
+    op.drop_column('campaigns', 'created_by')
+    op.drop_column('campaigns', 'end_date')
+    op.drop_column('campaigns', 'start_date')
+    op.drop_column('campaigns', 'cta')
+    op.drop_column('campaigns', 'tone')
+    op.drop_column('campaigns', 'target_audience')
+    op.drop_column('campaigns', 'topic')
+    op.drop_column('campaigns', 'objective')
+    op.alter_column('campaigns', 'name', nullable=True)
+    op.alter_column('campaigns', 'organization_id', nullable=True)
+
+    # SocialAccount
+    op.add_column('social_accounts', sa.Column('access_token', sa.String()))
+    op.add_column('social_accounts', sa.Column('account_id', sa.String()))
+    op.drop_constraint('uq_social_account', 'social_accounts', type_='unique')
+    op.drop_column('social_accounts', 'metadata')
+    op.drop_column('social_accounts', 'status')
+    op.execute("ALTER TABLE social_accounts ALTER COLUMN platform TYPE VARCHAR")
+    op.alter_column('social_accounts', 'platform', nullable=True)
+    op.drop_column('social_accounts', 'token_expires_at')
+    op.drop_column('social_accounts', 'refresh_token_encrypted')
+    op.drop_column('social_accounts', 'access_token_encrypted')
+    op.drop_column('social_accounts', 'account_name')
+    op.drop_column('social_accounts', 'external_account_id')
+    # op.drop_constraint(None, 'social_accounts', type_='foreignkey')
+    op.drop_column('social_accounts', 'organization_id')
+
+    # BrandProfile
+    op.drop_column('brand_profiles', 'prohibited_claims')
+    op.drop_column('brand_profiles', 'prohibited_words')
+    op.drop_column('brand_profiles', 'approved_messaging')
+    op.drop_column('brand_profiles', 'tone')
+    op.drop_column('brand_profiles', 'target_audience')
+    op.drop_column('brand_profiles', 'products')
+    op.drop_column('brand_profiles', 'description')
+    op.alter_column('brand_profiles', 'name', nullable=True)
+    op.alter_column('brand_profiles', 'organization_id', nullable=True)
+
+    # Organization
+    op.drop_index(op.f('ix_organizations_slug'), table_name='organizations')
+    op.alter_column('organizations', 'name', nullable=True)
+    op.drop_column('organizations', 'slug')
+
+    # User
+    op.alter_column('users', 'hashed_password', nullable=True)
+    op.alter_column('users', 'email', nullable=True)
+    op.drop_column('users', 'is_active')
+    op.drop_column('users', 'name')
+
+    # Drop OrganizationMember
+    op.drop_table('organization_members')
+
+    # Drop ENUMs
+    postgresql.ENUM('PERFORMANCE', 'RECOMMENDATION', 'TREND', 'CONTENT', 'ENGAGEMENT', name='insight_type_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('DRAFT', 'READY', 'SCHEDULED', 'SENDING', 'SENT', 'FAILED', 'CANCELLED', name='email_campaign_status_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('PENDING', 'AI_DRAFTED', 'APPROVED', 'REJECTED', 'REPLIED', 'ESCALATED', name='reply_status_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('QUESTION', 'PRAISE', 'COMPLAINT', 'LEAD', 'SPAM', 'OTHER', name='engagement_category_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('POSITIVE', 'NEUTRAL', 'NEGATIVE', name='sentiment_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('COMMENT', 'MESSAGE', 'MENTION', name='engagement_type_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('PUBLISHED', 'FAILED', 'DELETED', name='published_post_status_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('SCHEDULED', 'PROCESSING', 'PUBLISHED', 'FAILED', 'CANCELLED', name='schedule_status_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('DRAFT', 'GENERATED', 'IN_REVIEW', 'APPROVED', 'REJECTED', 'SCHEDULED', 'PUBLISHED', name='content_status_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('SOCIAL', 'EMAIL', name='content_type_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('DRAFT', 'PLANNING', 'READY', 'ACTIVE', 'COMPLETED', 'ARCHIVED', name='campaign_status_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('CONNECTED', 'DISCONNECTED', 'EXPIRED', 'ERROR', name='social_account_status_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('LINKEDIN', 'INSTAGRAM', 'FACEBOOK', 'X', name='platform_enum').drop(op.get_bind(), checkfirst=True)
+    postgresql.ENUM('OWNER', 'ADMIN', 'EDITOR', 'ANALYST', 'VIEWER', name='role_enum').drop(op.get_bind(), checkfirst=True)

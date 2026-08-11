@@ -68,4 +68,5 @@ class MockLLMProvider(LLMProvider):
         
         raise ValueError("Unsupported schema for MockLLMProvider")
 
-mock_provider = MockLLMProvider()
+mock_llm_provider = MockLLMProvider()
+mock_provider = mock_llm_provider

@@ -81,6 +81,7 @@ class ReplyStatusEnum(str, enum.Enum):
 class EmailCampaignStatusEnum(str, enum.Enum):
     DRAFT = "DRAFT"
     READY = "READY"
+    APPROVED = "APPROVED"
     SCHEDULED = "SCHEDULED"
     SENDING = "SENDING"
     SENT = "SENT"

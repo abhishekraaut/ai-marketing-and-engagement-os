@@ -142,7 +142,9 @@ class EngagementItem(Base, TimestampMixin):
     sentiment = Column(ENUM(SentimentEnum, name="sentiment_enum", create_type=False))
     category = Column(ENUM(EngagementCategoryEnum, name="engagement_category_enum", create_type=False))
     ai_generated_reply = Column(Text)
-    reply_status = Column(ENUM(ReplyStatusEnum, name="reply_status_enum", create_type=False))
+    human_reply = Column(Text)
+    external_reply_id = Column(String)
+    reply_status = Column(ENUM(ReplyStatusEnum, name="reply_status_enum", create_type=False), index=True)
 
     published_post = relationship("PublishedPost", back_populates="engagement_items")
     social_account = relationship("SocialAccount", back_populates="engagement_items")
@@ -173,6 +175,8 @@ class EmailCampaign(Base, TimestampMixin):
     status = Column(ENUM(EmailCampaignStatusEnum, name="email_campaign_status_enum", create_type=False), nullable=False)
     scheduled_at = Column(DateTime(timezone=True))
     sent_at = Column(DateTime(timezone=True))
+    recipient_count = Column(Integer, default=0)
+    external_campaign_id = Column(String)
 
     organization = relationship("Organization", back_populates="email_campaigns")
     campaign = relationship("Campaign", back_populates="email_campaigns")

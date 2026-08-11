@@ -4,18 +4,19 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: marketing_os
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-marketing_os}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d marketing_os"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-marketing_os}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -26,14 +27,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   backend:
     build: 
       context: ./backend
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/marketing_os
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-marketing_os}
       - REDIS_URL=redis://redis:6379/0
-      - JWT_SECRET=super_secret_jwt_key_please_change_in_production
+      - JWT_SECRET=${JWT_SECRET:-super_secret_jwt_key_please_change_in_production}
+      - AI_PROVIDER=${AI_PROVIDER:-mock}
+      - AI_API_KEY=${AI_API_KEY:-mock}
     ports:
       - "8000:8000"
     depends_on:
@@ -41,16 +45,22 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - ./backend:/app
+    command: ./start.sh
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   celery-worker:
     build:
       context: ./backend
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/marketing_os
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-marketing_os}
       - REDIS_URL=redis://redis:6379/0
+      - AI_PROVIDER=${AI_PROVIDER:-mock}
+      - AI_API_KEY=${AI_API_KEY:-mock}
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,14 +69,13 @@ services:
       backend:
         condition: service_started
     command: celery -A app.workers.celery_app worker --loglevel=info
-    volumes:
-      - ./backend:/app
+    restart: unless-stopped
 
   celery-beat:
     build:
       context: ./backend
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/marketing_os
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-marketing_os}
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       postgres:
@@ -76,21 +85,18 @@ services:
       celery-worker:
         condition: service_started
     command: celery -A app.workers.celery_app beat --loglevel=info
-    volumes:
-      - ./backend:/app
+    restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
     ports:
       - "3000:3000"
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    restart: unless-stopped
 
 volumes:
   postgres_data:
