@@ -13,28 +13,32 @@ import Link from 'next/link';
 
 export default function Dashboard() {
   const { currentOrgId: ORG_ID } = useAuth();
-  if (!ORG_ID) return <div>Loading...</div>;
+
   const { data: overview, isLoading: overviewLoading } = useQuery({
     queryKey: ['analytics_overview', ORG_ID],
-    queryFn: () => analyticsApi.getOverview(ORG_ID)
+    queryFn: () => analyticsApi.getOverview(ORG_ID!),
+    enabled: !!ORG_ID
   });
 
   const { data: recommendations, isLoading: recLoading } = useQuery({
     queryKey: ['analytics_recommendations', ORG_ID],
-    queryFn: () => analyticsApi.getRecommendations(ORG_ID)
+    queryFn: () => analyticsApi.getRecommendations(ORG_ID!),
+    enabled: !!ORG_ID
   });
 
   const { data: engagements = [] } = useQuery({
     queryKey: ['engagements', ORG_ID],
-    queryFn: () => engagementApi.getEngagements(ORG_ID)
+    queryFn: () => engagementApi.getEngagements(ORG_ID!),
+    enabled: !!ORG_ID
   });
 
   const { data: emails = [] } = useQuery({
     queryKey: ['emails', ORG_ID],
-    queryFn: () => emailApi.getEmails(ORG_ID)
+    queryFn: () => emailApi.getEmails(ORG_ID!),
+    enabled: !!ORG_ID
   });
 
-  if (overviewLoading) {
+  if (!ORG_ID || overviewLoading) {
     return <div className="p-8 text-center text-slate-500">Loading Dashboard...</div>;
   }
 
@@ -73,8 +77,8 @@ export default function Dashboard() {
 
       {/* Top Metrics Row */}
       <div className="grid grid-cols-4 gap-4">
-        <MetricCard label="Total Reach" value={overview?.total_reach?.toLocaleString() || 0} change="+12%" />
-        <MetricCard label="Engagement Rate" value={`${(overview?.avg_engagement_rate * 100 || 0).toFixed(1)}%`} change="+2.4%" />
+        <MetricCard label="Total Reach" value={overview?.total_reach?.toLocaleString() || 0} />
+        <MetricCard label="Engagement Rate" value={`${(overview?.avg_engagement_rate * 100 || 0).toFixed(1)}%`} />
         <MetricCard label="Pending Inbox Replies" value={pendingEngagements} alert={pendingEngagements > 0} />
         <MetricCard label="Active Emails" value={activeEmails} />
       </div>
@@ -93,8 +97,8 @@ export default function Dashboard() {
             ) : recommendations?.length > 0 ? (
               <div className="space-y-4">
                 {recommendations.map((rec: any) => (
-                  <div key={rec.id} className="bg-indigo-50 border border-indigo-100 p-4 rounded-lg">
-                    <h3 className="font-semibold text-indigo-900 text-sm mb-1">{rec.insight}</h3>
+                  <div key={rec.title} className="bg-indigo-50 border border-indigo-100 p-4 rounded-lg">
+                    <h3 className="font-semibold text-indigo-900 text-sm mb-1">{rec.insight || rec.title}</h3>
                     <p className="text-indigo-700 text-sm">{rec.recommendation}</p>
                     <div className="mt-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">{rec.category}</div>
                   </div>

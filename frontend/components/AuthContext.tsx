@@ -8,7 +8,7 @@ interface User {
   id: number;
   email: string;
   name: string;
-  memberships: any[];
+  organizations: any[];
 }
 
 interface AuthContextType {
@@ -26,8 +26,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const initialized = React.useRef(false);
 
   useEffect(() => {
+    if (initialized.current) {
+      const token = localStorage.getItem('token');
+      if (!token && pathname !== '/login') {
+        router.push('/login');
+      }
+      return;
+    }
+
     const initAuth = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -37,12 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return;
       }
+      
+      initialized.current = true;
       try {
         const userData = await authApi.getMe();
         setUser(userData);
       } catch (error) {
         console.error('Failed to authenticate', error);
         localStorage.removeItem('token');
+        initialized.current = false;
         if (pathname !== '/login') {
           router.push('/login');
         }
@@ -56,17 +68,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (token: string, userData: User) => {
     localStorage.setItem('token', token);
     setUser(userData);
+    initialized.current = true;
     router.push('/');
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    initialized.current = false;
     router.push('/login');
   };
 
   // Derive current org id from first membership for simplicity in this prototype
-  const currentOrgId = user?.memberships?.[0]?.organization_id || null;
+  const currentOrgId = user?.organizations?.[0]?.id || null;
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, currentOrgId }}>

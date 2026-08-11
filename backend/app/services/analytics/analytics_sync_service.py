@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models.domain import PublishedPost, AnalyticsSnapshot, AuditLog
 from app.models.enums import PublishedPostStatusEnum
-from app.services.connectors.mock.mock_connector import mock_connector
+from app.services.connectors.factory import get_connector
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +33,12 @@ class AnalyticsSyncService:
                 if existing and existing.snapshot_date.date() == today:
                     continue # Already synced today
 
-                metrics = mock_connector.get_analytics(
+                platform_name = post.social_account.platform.value
+                connector = get_connector(platform_name)
+                
+                metrics = connector.get_analytics(
                     post_id=post.external_post_id,
-                    platform_name=post.social_account.platform.value
+                    platform_name=platform_name
                 )
 
                 snapshot = AnalyticsSnapshot(

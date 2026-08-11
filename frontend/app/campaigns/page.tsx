@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { campaignsApi, contentApi, schedulesApi, Campaign } from '@/lib/api/client';
+import { campaignsApi, contentApi, schedulesApi, socialAccountsApi, Campaign } from '@/lib/api/client';
 import { addDays, formatISO } from 'date-fns';
 
 const AVAILABLE_PLATFORMS = ['LINKEDIN', 'INSTAGRAM', 'FACEBOOK', 'X'];
@@ -22,6 +22,24 @@ export default function CampaignsPage() {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>('LINKEDIN');
   const [scheduleData, setScheduleData] = useState({ date: '', time: '' });
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const showMessage = (msg: string, isError: boolean = false) => {
+    if (isError) {
+      setErrorMsg(msg);
+      setTimeout(() => setErrorMsg(''), 5000);
+    } else {
+      setSuccessMsg(msg);
+      setTimeout(() => setSuccessMsg(''), 3000);
+    }
+  };
+
+  const { data: accounts } = useQuery({
+    queryKey: ['social-accounts', ORG_ID],
+    queryFn: () => socialAccountsApi.getAccounts(ORG_ID),
+    enabled: !!ORG_ID
+  });
 
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns', ORG_ID],
@@ -48,7 +66,7 @@ export default function CampaignsPage() {
         setActiveTab(data.variants[0].platform);
       }
     },
-    onError: (error: Error) => alert(error.message)
+    onError: (error: Error) => showMessage(error.message, true)
   });
 
   const actionMutation = useMutation({
@@ -75,9 +93,9 @@ export default function CampaignsPage() {
         });
         return { ...prev, variants: newVariants };
       });
-      alert(`Action ${variables.action} successful!`);
+      showMessage(`Action ${variables.action} successful!`);
     },
-    onError: (error: Error) => alert(error.message)
+    onError: (error: Error) => showMessage(error.message, true)
   });
 
   const handleAction = (action: string, variant: any) => {
@@ -85,7 +103,7 @@ export default function CampaignsPage() {
     // We assume variant has id and generatedContent has content_item_id
     if (action === 'schedule') {
        if (!scheduleData.date || !scheduleData.time) {
-          alert("Please pick a date and time");
+          showMessage("Please pick a date and time", true);
           return;
        }
        const dt = new Date(`${scheduleData.date}T${scheduleData.time}`);
@@ -94,7 +112,7 @@ export default function CampaignsPage() {
          contentId: generatedContent.content_item_id, 
          variantId: variant.id || 1, // Fallback for UI testing
          payload: {
-           social_account_id: 1, // hardcoded for phase 5 UI demo
+           social_account_id: accounts?.[0]?.id || 1, // dynamically fetch from accounts
            scheduled_at: formatISO(dt),
            timezone: "UTC"
          }
@@ -123,6 +141,17 @@ export default function CampaignsPage() {
           </button>
         )}
       </div>
+
+      {errorMsg && (
+        <div className="bg-red-50 text-red-700 p-3 rounded border border-red-200 text-sm">
+          {errorMsg}
+        </div>
+      )}
+      {successMsg && (
+        <div className="bg-green-50 text-green-700 p-3 rounded border border-green-200 text-sm">
+          {successMsg}
+        </div>
+      )}
 
       {isCreating && (
         <form onSubmit={(e) => { e.preventDefault(); createMutation.mutate(formData); }} className="bg-white p-6 rounded shadow border border-slate-200 space-y-4">

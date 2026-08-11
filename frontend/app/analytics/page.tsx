@@ -13,12 +13,14 @@ export default function AnalyticsPage() {
   const queryClient = useQueryClient();
   const [dateFilter, setDateFilter] = useState('30');
   const [platformFilter, setPlatformFilter] = useState('ALL');
+  const [syncMessage, setSyncMessage] = useState('');
 
   // Compute dates for filtering
   const getDates = () => {
     if (dateFilter === 'ALL') return {};
     const d = new Date();
     d.setDate(d.getDate() - parseInt(dateFilter));
+    d.setHours(0, 0, 0, 0); // Stable timestamp to prevent React Query infinite loops
     return { start_date: d.toISOString() };
   };
 
@@ -57,7 +59,8 @@ export default function AnalyticsPage() {
       queryClient.invalidateQueries({ queryKey: ['analytics-platforms'] });
       queryClient.invalidateQueries({ queryKey: ['analytics-top'] });
       queryClient.invalidateQueries({ queryKey: ['analytics-recommendations'] });
-      alert(`Sync completed. Synced ${res.synced_posts} posts.`);
+      setSyncMessage(`Synced ${res.synced_posts} posts.`);
+      setTimeout(() => setSyncMessage(''), 4000);
     }
   });
 
@@ -100,13 +103,16 @@ export default function AnalyticsPage() {
             <option value="FACEBOOK">Facebook</option>
           </select>
 
-          <button 
-            onClick={() => syncMutation.mutate()}
-            disabled={syncMutation.isPending}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {syncMutation.isPending ? 'Syncing...' : 'Sync Now'}
-          </button>
+          <div className="flex items-center gap-2">
+            {syncMessage && <span className="text-sm text-green-600 font-medium">{syncMessage}</span>}
+            <button 
+              onClick={() => syncMutation.mutate()}
+              disabled={syncMutation.isPending}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {syncMutation.isPending ? 'Syncing...' : 'Sync Now'}
+            </button>
+          </div>
         </div>
       </div>
 
