@@ -2,7 +2,7 @@ import logging
 from celery import shared_task
 from app.services.engagement.engagement_sync_service import engagement_sync_service
 from app.db.session import SessionLocal
-from app.models.domain import Organization
+from app.models.user import Organization
 
 logger = logging.getLogger(__name__)
 
