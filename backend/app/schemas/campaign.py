@@ -39,3 +39,4 @@ class CampaignResponse(CampaignBase):
 
 class GenerateContentRequest(BaseModel):
     platforms: Optional[List[str]] = ["LINKEDIN", "INSTAGRAM", "FACEBOOK", "X"]
+    format: Optional[str] = "Standard Post"

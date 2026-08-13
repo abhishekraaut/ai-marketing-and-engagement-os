@@ -32,9 +32,9 @@ Use the following credentials to access the application and explore the demo dat
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | `founder@aisaastas.com` | `password123` |
-| **Editor** | `admin@aisaastas.com` | `password123` |
-| **Viewer** | `member@aisaastas.com` | `password123` |
+| **Admin** | `abhishek@aiagency.com` | `password123` |
+| **Editor** | `marketing@aiagency.com` | `password123` |
+| **Viewer** | `content@aiagency.com` | `password123` |
 
 ---
 

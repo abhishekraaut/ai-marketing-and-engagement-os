@@ -42,7 +42,7 @@ class CampaignService:
         db.refresh(db_campaign)
         return db_campaign
 
-    async def generate_campaign_content(self, db: Session, campaign_id: int, organization_id: int, platforms: List[str]) -> dict:
+    async def generate_campaign_content(self, db: Session, campaign_id: int, organization_id: int, platforms: List[str], format: Optional[str] = "Standard Post") -> dict:
         # Validate campaign
         campaign = self.get_campaign(db, campaign_id, organization_id)
         
@@ -52,7 +52,8 @@ class CampaignService:
                 db=db,
                 organization_id=organization_id,
                 campaign_id=campaign_id,
-                platforms=platforms
+                platforms=platforms,
+                format=format
             )
         except ValueError as e:
             if "Brand Profile must be configured" in str(e):

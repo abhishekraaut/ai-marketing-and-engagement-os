@@ -27,5 +27,5 @@ def update_campaign(organization_id: int, campaign_id: int, campaign_in: Campaig
 
 @router.post("/organizations/{organization_id}/campaigns/{campaign_id}/generate-content")
 async def generate_content(organization_id: int, campaign_id: int, request: GenerateContentRequest, db: Session = Depends(get_db), _ = Depends(require_role(RoleEnum.OWNER, RoleEnum.ADMIN, RoleEnum.EDITOR))):
-    return await campaign_service.generate_campaign_content(db, campaign_id, organization_id, request.platforms or [])
+    return await campaign_service.generate_campaign_content(db, campaign_id, organization_id, request.platforms or [], request.format)
 

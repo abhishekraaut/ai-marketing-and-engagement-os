@@ -8,31 +8,38 @@ from app.models.user import User, Organization, OrganizationMember
 from app.models.domain import (
     BrandProfile, SocialAccount, Campaign, ContentItem, PlatformVariant,
     Schedule, PublishedPost, AnalyticsSnapshot, EngagementItem, Audience, 
-    EmailCampaign, AIInsight, AuditLog
+    EmailCampaign, AIInsight, AuditLog, Lead
 )
 from app.models.enums import *
 
+from sqlalchemy import text
+
 def seed_data(db: Session):
-    org_slug = "ai-saas-inc"
-    user_email = "founder@aisaastas.com"
+    org_slug = "abhisheks-ai-agency"
+    user_email = "abhishek@aiagency.com"
     
     # Check if org exists
     org = db.query(Organization).filter_by(slug=org_slug).first()
     if org:
         print("Database is already seeded. Skipping.")
         return
+        
+    # If not seeded, ensure it's clean before seeding
+    db.execute(text("TRUNCATE TABLE organizations CASCADE;"))
+    db.execute(text("TRUNCATE TABLE users CASCADE;"))
+    db.commit()
 
 
     hashed_pw = get_password_hash("password123")
 
-    user_owner = User(email="founder@aisaastas.com", name="Alice Founder", hashed_password=hashed_pw, is_active=True)
-    user_admin = User(email="admin@aisaastas.com", name="Bob Admin", hashed_password=hashed_pw, is_active=True)
-    user_member = User(email="member@aisaastas.com", name="Charlie Member", hashed_password=hashed_pw, is_active=True)
+    user_owner = User(email="abhishek@aiagency.com", name="Abhishek", hashed_password=hashed_pw, is_active=True)
+    user_admin = User(email="marketing@aiagency.com", name="Marketing Lead", hashed_password=hashed_pw, is_active=True)
+    user_member = User(email="content@aiagency.com", name="Content Creator", hashed_password=hashed_pw, is_active=True)
     
     db.add_all([user_owner, user_admin, user_member])
     db.commit()
 
-    org = Organization(name="AI SaaS Inc.", slug="ai-saas-inc")
+    org = Organization(name="Abhishek's AI Agency", slug="abhisheks-ai-agency")
     db.add(org)
     db.commit()
     
@@ -47,20 +54,23 @@ def seed_data(db: Session):
 
     bp = BrandProfile(
         organization_id=org.id,
-        name="AI SaaS Brand",
-        description="B2B AI Platform for marketing teams.",
-        products=["AI Copywriter", "Analytics Agent"],
-        target_audience=["CMOs", "Marketing Managers"],
-        tone="Professional, innovative, confident",
+        name="Abhishek's AI Agency",
+        description="Next-generation marketing solutions powered by AI.",
+        products=["AI Marketing Automation", "AI Content Engine"],
+        target_audience=["Startup Founders", "CMOs", "Marketing Directors"],
+        tone="Innovative, professional, dynamic",
+        approved_messaging=["Scale your marketing", "AI-driven ROI", "Automate engagement"],
+        prohibited_words=["cheap", "fake AI"],
+        prohibited_claims=["Guaranteed leads", "100% automated without human touch"]
     )
     db.add(bp)
     db.commit()
 
     platforms = [
-        (PlatformEnum.LINKEDIN, "li_12345", "AI SaaS LinkedIn"),
-        (PlatformEnum.X, "x_98765", "@aisaastas"),
-        (PlatformEnum.INSTAGRAM, "ig_111", "aisaastas_ig"),
-        (PlatformEnum.FACEBOOK, "fb_222", "AI SaaS FB Page")
+        (PlatformEnum.LINKEDIN, "li_abhishek", "Abhishek LinkedIn"),
+        (PlatformEnum.X, "tw_abhishek", "Abhishek X"),
+        (PlatformEnum.INSTAGRAM, "ig_abhishek", "Abhishek IG"),
+        (PlatformEnum.YOUTUBE, "yt_abhishek", "Abhishek YT"),
     ]
     accounts = {}
     for p, ext, name in platforms:
@@ -127,7 +137,8 @@ def seed_data(db: Session):
         db.commit()
 
         # Generate a variant for a random platform
-        p = list(PlatformEnum)[i % 4]
+        platforms_list = list(accounts.keys())
+        p = platforms_list[i % len(platforms_list)]
         var = PlatformVariant(
             content_item_id=ci.id,
             platform=p,
@@ -176,6 +187,8 @@ def seed_data(db: Session):
             comments=metrics["comments"],
             shares=metrics["shares"],
             clicks=metrics["clicks"],
+            url_clicks=int(metrics["clicks"] * 0.4),
+            followers=random.randint(2, 15),
             engagement_rate=metrics["engagement_rate"],
         )
         db.add(snap)
@@ -201,7 +214,7 @@ def seed_data(db: Session):
         campaign_id=camp1.id,  # FIXED NameError here
         subject="Exclusive Summer Savings Inside! ☀️",
         preview_text="Get 20% off our premium tier this week only.",
-        body="Hi there,\n\nWe're celebrating summer with an exclusive 20% discount on all premium plans. Upgrade today and supercharge your marketing.\n\nBest,\nThe TechNova Team",
+        body="Hi there,\n\nWe're celebrating summer with an exclusive 20% discount on all premium plans. Upgrade today and supercharge your marketing.\n\nBest,\nAbhishek's AI Agency Team",
         cta="Upgrade Now",
         status=EmailCampaignStatusEnum.SENT,
         recipient_count=450,
@@ -213,11 +226,50 @@ def seed_data(db: Session):
         audience_id=audience1.id,
         subject="3 Ways to Automate Your Social Media",
         preview_text="Stop wasting time on manual posting.",
-        body="Hello,\n\nDid you know you can save 10 hours a week by automating your social media schedule? Here are three tips to get started...\n\nCheers,\nTechNova",
+        body="Hello,\n\nDid you know you can save 10 hours a week by automating your social media schedule? Here are three tips to get started...\n\nCheers,\nAbhishek's AI Agency",
         cta="Read the Guide",
         status=EmailCampaignStatusEnum.APPROVED
     )
     db.add_all([email1, email2])
+    db.commit()
+
+    # Seed Leads
+    lead1 = Lead(
+        organization_id=org.id,
+        name="John Doe",
+        email="john@example.com",
+        phone="+1234567890",
+        source=LeadSourceEnum.WEBSITE,
+        status=LeadStatusEnum.NEW,
+        notes="Interested in AI marketing."
+    )
+    lead2 = Lead(
+        organization_id=org.id,
+        name="Jane Smith",
+        email="jane@example.com",
+        phone="+1987654321",
+        source=LeadSourceEnum.REFERRAL,
+        status=LeadStatusEnum.QUALIFIED,
+        notes="Referred by a friend."
+    )
+    lead3 = Lead(
+        organization_id=org.id,
+        name="Acme Corp",
+        email="contact@acme.com",
+        source=LeadSourceEnum.SOCIAL,
+        status=LeadStatusEnum.CONVERTED,
+        conversion_time_hours=48,
+        notes="Converted after 2 days."
+    )
+    lead4 = Lead(
+        organization_id=org.id,
+        name="Tech Startup",
+        email="hello@techstartup.io",
+        source=LeadSourceEnum.WEBSITE,
+        status=LeadStatusEnum.LOST,
+        notes="Budget too low."
+    )
+    db.add_all([lead1, lead2, lead3, lead4])
     db.commit()
 
     print("\nSeed completed successfully.")

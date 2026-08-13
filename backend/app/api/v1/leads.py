@@ -58,8 +58,15 @@ def update_lead(organization_id: int, lead_id: int, lead_update: LeadUpdate, db:
     if lead_update.email is not None: lead.email = lead_update.email
     if lead_update.phone is not None: lead.phone = lead_update.phone
     if lead_update.source is not None: lead.source = lead_update.source
-    if lead_update.status is not None: lead.status = lead_update.status
     if lead_update.notes is not None: lead.notes = lead_update.notes
+    
+    if lead_update.status is not None: 
+        lead.status = lead_update.status
+        # Calculate conversion time if moving to CONVERTED and it hasn't been set yet
+        if lead.status == LeadStatusEnum.CONVERTED and lead.conversion_time_hours is None and lead.created_at:
+            created_dt = lead.created_at.replace(tzinfo=None)
+            lead.conversion_time_hours = round((datetime.utcnow() - created_dt).total_seconds() / 3600.0, 2)
+            
     if lead_update.conversion_time_hours is not None: lead.conversion_time_hours = lead_update.conversion_time_hours
         
     db.commit()

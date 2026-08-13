@@ -12,8 +12,11 @@ class AIRecommendation(BaseModel):
     platform: Optional[str] = None
     priority: str
 
+class AIRecommendationList(BaseModel):
+    recommendations: List[AIRecommendation]
+
 class RecommendationService:
-    def get_recommendations(self, db: Session, org_id: int) -> List[dict]:
+    async def get_recommendations(self, db: Session, org_id: int) -> List[dict]:
         # 1. Fetch aggregated analytics context
         overview = analytics_aggregator.get_overview(db, org_id)
         platforms = analytics_aggregator.get_platform_performance(db, org_id)
@@ -29,36 +32,21 @@ class RecommendationService:
         }
 
         # 2. Build prompt
-        prompt = f"Analyze the following marketing metrics and provide optimization recommendations.\nContext: {json.dumps(context)}"
+        system_prompt = "You are an expert AI marketing analyst. Analyze the provided metrics and return a list of exactly 3 actionable recommendations."
+        user_prompt = f"Analyze the following marketing metrics and provide optimization recommendations.\nContext: {json.dumps(context)}"
         
-        # 3. Call LLM (using mock for speed/safety)
-        # The mock provider in Phase 4 usually returns fixed responses, but we'll mock it specifically here
-        # or just generate deterministic recommendations based on the data directly for the prototype.
-        # To simulate LLM behavior deterministically, we'll implement a static logic tree mimicking the prompt
-        
-        recommendations = []
-        
-        # Sort platforms by engagement rate
-        sorted_plats = sorted(platforms, key=lambda x: x["engagement_rate"], reverse=True)
-        if sorted_plats:
-            top_plat = sorted_plats[0]
-            recommendations.append(AIRecommendation(
-                title=f"Increase {top_plat['platform']} Publishing",
-                recommendation=f"Publish more content on {top_plat['platform']} to capitalize on high engagement.",
-                reason=f"{top_plat['platform']} currently has the highest engagement rate at {top_plat['engagement_rate']}%.",
-                platform=top_plat['platform'],
-                priority="HIGH"
-            ))
-            
-        if overview["posts_published"] > 0:
-             recommendations.append(AIRecommendation(
-                title="Improve Posting Time",
-                recommendation="Test publishing between 10 AM and 11 AM based on recent velocity.",
-                reason="Posts published during this window show stronger comparative baseline engagement.",
-                platform=None,
-                priority="MEDIUM"
-            ))
-            
-        return [r.model_dump() for r in recommendations]
+        # 3. Call LLM
+        llm_provider = get_llm_provider()
+        try:
+            result: AIRecommendationList = await llm_provider.generate(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                response_schema=AIRecommendationList
+            )
+            return [r.model_dump() for r in result.recommendations]
+        except Exception as e:
+            # Fallback in case of LLM error
+            print(f"Error generating insights: {e}")
+            return []
 
 recommendation_service = RecommendationService()

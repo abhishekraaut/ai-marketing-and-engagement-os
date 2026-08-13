@@ -101,5 +101,59 @@ services:
       - backend
     restart: unless-stopped
 
+  umami-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    restart: always
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:umami@umami-db:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: my-super-secret-umami-key
+    depends_on:
+      - umami-db
+    restart: always
+
+  matomo-db:
+    image: mariadb:10.11
+    command: --max-allowed-packet=64MB
+    environment:
+      MARIADB_DATABASE: matomo
+      MARIADB_USER: matomo
+      MARIADB_PASSWORD: matomopassword
+      MARIADB_ROOT_PASSWORD: matomorootpassword
+    volumes:
+      - matomo-db-data:/var/lib/mysql
+    restart: always
+
+  matomo:
+    image: matomo
+    ports:
+      - "8080:80"
+    environment:
+      MATOMO_DATABASE_HOST: matomo-db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_TABLES_PREFIX: matomo_
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: matomopassword
+      MATOMO_DATABASE_DBNAME: matomo
+    volumes:
+      - matomo-data:/var/www/html
+    depends_on:
+      - matomo-db
+    restart: always
+
 volumes:
   postgres_data:
+  umami-db-data:
+  matomo-db-data:
+  matomo-data:

@@ -14,7 +14,7 @@ You must:
 - optimize for engagement without clickbait"""
 
     @staticmethod
-    def build_campaign_prompt(brand: BrandProfile, campaign: Campaign, platforms: List[str]) -> str:
+    def build_campaign_prompt(brand: BrandProfile, campaign: Campaign, platforms: List[str], format: str = "Standard Post") -> str:
         # Brand Context
         brand_context = f"""
 Brand Name: {brand.name}
@@ -34,6 +34,7 @@ Objective: {campaign.objective or 'N/A'}
 Topic: {campaign.topic or 'N/A'}
 Campaign Tone: {campaign.tone or 'N/A'}
 CTA: {campaign.cta or 'N/A'}
+Content Format Requested: {format}
 """
 
         # Platform Requirements
@@ -47,9 +48,12 @@ CTA: {campaign.cta or 'N/A'}
                 platform_reqs.append("FACEBOOK: conversational, community-oriented, accessible language.")
             elif p == "X":
                 platform_reqs.append("X: concise, strong hook, short-form.")
+            elif p == "YOUTUBE":
+                platform_reqs.append("YOUTUBE: video title, description, engaging hook for viewers, relevant tags/hashtags.")
 
         return f"""
 Please generate marketing content variants based on the following contexts.
+Ensure the content matches the requested format ({format}). For example, if it's a Video/Reel, provide a short script and caption.
 
 --- BRAND BRAIN ---
 {brand_context}

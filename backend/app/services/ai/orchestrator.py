@@ -11,7 +11,8 @@ class AIOrchestrator:
         db: Session,
         organization_id: int,
         campaign_id: int,
-        platforms: List[str]
+        platforms: List[str],
+        format: Optional[str] = "Standard Post"
     ) -> GeneratedCampaignContent:
         
         # 1. Load Campaign & Organization context
@@ -33,7 +34,7 @@ class AIOrchestrator:
 
         # 3. Build Prompts
         system_prompt = PromptBuilder.build_system_prompt()
-        user_prompt = PromptBuilder.build_campaign_prompt(brand, campaign, platforms)
+        user_prompt = PromptBuilder.build_campaign_prompt(brand, campaign, platforms, format)
 
         # 4. Call LLM Provider (Mock for now, could be swapped based on env vars)
         try:

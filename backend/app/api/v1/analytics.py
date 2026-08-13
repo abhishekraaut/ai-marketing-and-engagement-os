@@ -31,8 +31,8 @@ def get_top_content(organization_id: int, db: Session = Depends(get_db), _ = Dep
     return analytics_aggregator.get_top_content(db, organization_id)
 
 @router.get("/organizations/{organization_id}/analytics/recommendations")
-def get_recommendations(organization_id: int, db: Session = Depends(get_db), _ = Depends(verify_organization_access)):
-    return recommendation_service.get_recommendations(db, organization_id)
+async def get_recommendations(organization_id: int, db: Session = Depends(get_db), _ = Depends(verify_organization_access)):
+    return await recommendation_service.get_recommendations(db, organization_id)
 
 @router.post("/organizations/{organization_id}/analytics/sync")
 def sync_analytics(organization_id: int, _ = Depends(verify_organization_access)):
