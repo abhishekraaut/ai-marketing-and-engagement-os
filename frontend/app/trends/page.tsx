@@ -5,129 +5,254 @@ import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { trendsApi } from '@/lib/api/client';
 import Link from 'next/link';
-
+import { TrendingUp, Sparkles, AlertTriangle, ArrowRight, Zap, Target, ShieldAlert } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/ToastContext';
 
 export default function TrendsPage() {
   const { currentOrgId: ORG_ID } = useAuth();
-  if (!ORG_ID) return <div>Loading...</div>;
   const [selectedTrend, setSelectedTrend] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { data: trends = [], isLoading } = useQuery({
     queryKey: ['trends', ORG_ID],
-    queryFn: () => trendsApi.getTrends(ORG_ID)
+    queryFn: () => trendsApi.getTrends(ORG_ID!),
+    enabled: !!ORG_ID
   });
 
   const evaluateMutation = useMutation({
-    mutationFn: (trendId: string) => trendsApi.evaluateTrend(ORG_ID, trendId),
+    mutationFn: (trendId: string) => trendsApi.evaluateTrend(ORG_ID!, trendId),
+    onError: () => {
+      toast({ title: 'Evaluation Failed', description: 'Failed to analyze trend against your Brand Brain. Please ensure it is configured.', type: 'error' });
+    }
   });
 
+  if (!ORG_ID) return <TrendsSkeleton />;
+
   if (isLoading) {
-    return <div className="p-8 text-center text-slate-500">Loading Trends...</div>;
+    return <TrendsSkeleton />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 space-y-6">
-      <div className="flex justify-between items-end">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Trend Analysis & Current Affairs</h1>
-          <p className="text-slate-500 text-sm mt-1">Discover trending topics and let AI evaluate their relevance to your Brand Brain.</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-indigo-600" />
+            Trend Discovery
+          </h1>
+          <p className="text-slate-500 mt-1">Discover trending topics and let AI evaluate their relevance to your Brand Brain.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 space-y-4">
-          <h2 className="text-lg font-semibold text-slate-800">Current Trends</h2>
-          <div className="flex flex-col space-y-3">
-            {trends.map((trend: any) => (
-              <button
-                key={trend.id}
-                onClick={() => {
-                  setSelectedTrend(trend.id);
-                  evaluateMutation.mutate(trend.id);
-                }}
-                className={`text-left p-4 rounded-lg border transition-all ${selectedTrend === trend.id ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500' : 'border-slate-200 bg-white hover:border-indigo-300'}`}
-              >
-                <div className="flex justify-between items-start mb-1">
-                  <span className="font-semibold text-slate-900">{trend.title}</span>
-                  <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-600 rounded">{trend.category}</span>
-                </div>
-                <p className="text-sm text-slate-600">{trend.description}</p>
-              </button>
-            ))}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Trend List */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Current Trends</h2>
+            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-semibold">{trends.length} active</span>
+          </div>
+          
+          <div className="flex flex-col space-y-3 max-h-[800px] overflow-y-auto pr-2 scrollbar-hide">
+            {trends.length === 0 ? (
+              <div className="text-center p-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <p className="text-slate-500 text-sm">No active trends found in your industry right now.</p>
+              </div>
+            ) : (
+              trends.map((trend: any) => (
+                <button
+                  key={trend.id}
+                  onClick={() => {
+                    setSelectedTrend(trend.id);
+                    evaluateMutation.mutate(trend.id);
+                  }}
+                  className={cn(
+                    "text-left p-5 rounded-xl border transition-all duration-200 group relative overflow-hidden",
+                    selectedTrend === trend.id 
+                      ? "border-indigo-500 bg-indigo-50/50 shadow-md ring-1 ring-indigo-500" 
+                      : "border-slate-200 bg-white hover:border-indigo-300 hover:shadow-sm"
+                  )}
+                >
+                  {selectedTrend === trend.id && (
+                    <div className="absolute top-0 left-0 w-1 h-full bg-indigo-600" />
+                  )}
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={cn(
+                      "font-bold pr-2 leading-tight",
+                      selectedTrend === trend.id ? "text-indigo-900" : "text-slate-900"
+                    )}>
+                      {trend.title}
+                    </span>
+                    <span className={cn(
+                      "text-[10px] font-extrabold px-2 py-1 rounded-full uppercase tracking-wider shrink-0",
+                      selectedTrend === trend.id ? "bg-indigo-200 text-indigo-800" : "bg-slate-100 text-slate-600"
+                    )}>
+                      {trend.category}
+                    </span>
+                  </div>
+                  <p className={cn(
+                    "text-sm line-clamp-2",
+                    selectedTrend === trend.id ? "text-indigo-700/80" : "text-slate-500"
+                  )}>
+                    {trend.description}
+                  </p>
+                </button>
+              ))
+            )}
           </div>
         </div>
 
-        <div className="md:col-span-2">
+        {/* Right Column: AI Analysis */}
+        <div className="lg:col-span-2">
           {selectedTrend ? (
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 h-full">
-              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <span>🤖</span> AI Brand Relevance Evaluation
-              </h2>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full min-h-[500px] flex flex-col overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
               
-              {evaluateMutation.isPending ? (
-                <div className="flex items-center justify-center h-48">
-                  <div className="text-slate-500 animate-pulse flex items-center gap-2">
-                    <svg className="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Analyzing trend against Brand Brain...
+              <div className="p-6 sm:p-8 flex-1">
+                <div className="flex items-center gap-3 mb-8 pb-6 border-b border-slate-100">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">Brand Relevance Analysis</h2>
+                    <p className="text-sm text-slate-500">Evaluating against your configured Brand Brain profile.</p>
                   </div>
                 </div>
-              ) : evaluateMutation.isError ? (
-                <div className="bg-red-50 text-red-700 p-4 rounded border border-red-200">
-                  Failed to evaluate trend. Is your Brand Profile fully configured?
-                </div>
-              ) : evaluateMutation.isSuccess && evaluateMutation.data ? (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100">
-                    <div className="flex-shrink-0">
-                      <div className={`text-3xl font-black ${evaluateMutation.data.relevance_score > 70 ? 'text-green-600' : evaluateMutation.data.relevance_score > 40 ? 'text-yellow-600' : 'text-slate-400'}`}>
-                        {evaluateMutation.data.relevance_score}
-                      </div>
-                      <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold text-center mt-1">Score</div>
+                
+                {evaluateMutation.isPending ? (
+                  <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                    <div className="relative">
+                      <div className="w-16 h-16 border-4 border-indigo-100 rounded-full animate-pulse" />
+                      <div className="w-16 h-16 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin absolute inset-0" />
+                      <Sparkles className="w-6 h-6 text-indigo-600 absolute inset-0 m-auto animate-pulse" />
                     </div>
+                    <div className="text-indigo-600 font-medium">Synthesizing strategy...</div>
+                  </div>
+                ) : evaluateMutation.isError ? (
+                  <div className="bg-red-50 text-red-700 p-6 rounded-xl border border-red-200 flex items-start gap-4">
+                    <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-semibold text-slate-900">Relevance Analysis</h3>
-                      <p className="text-slate-600 text-sm">{evaluateMutation.data.reason}</p>
+                      <h3 className="font-bold mb-1">Analysis Failed</h3>
+                      <p className="text-sm">We couldn't evaluate this trend. Please ensure your Brand Brain is fully configured before running analyses.</p>
+                      <Link href="/brand" className="inline-flex items-center gap-2 mt-4 text-sm font-bold text-red-800 hover:underline">
+                        Configure Brand Brain <ArrowRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   </div>
-
-                  <div>
-                    <h3 className="font-semibold text-slate-800 mb-2 text-sm uppercase tracking-wider">Recommended Angle</h3>
-                    <div className="bg-indigo-50 text-indigo-900 p-4 rounded-lg border border-indigo-100 text-sm">
-                      {evaluateMutation.data.recommended_angle}
+                ) : evaluateMutation.isSuccess && evaluateMutation.data ? (
+                  <div className="space-y-8 animate-in fade-in duration-500">
+                    
+                    {/* Score Card */}
+                    <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-6">
+                      <div className="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-100 min-w-[160px]">
+                        <div className="relative flex items-center justify-center">
+                          <svg className="w-24 h-24 transform -rotate-90">
+                            <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-200" />
+                            <circle 
+                              cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" 
+                              strokeDasharray={251.2} 
+                              strokeDashoffset={251.2 - (251.2 * evaluateMutation.data.relevance_score) / 100}
+                              className={cn(
+                                "transition-all duration-1000 ease-out",
+                                evaluateMutation.data.relevance_score > 70 ? 'text-emerald-500' : 
+                                evaluateMutation.data.relevance_score > 40 ? 'text-amber-500' : 'text-slate-400'
+                              )} 
+                            />
+                          </svg>
+                          <span className="absolute text-3xl font-black text-slate-900">
+                            {evaluateMutation.data.relevance_score}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Match Score</span>
+                      </div>
+                      
+                      <div className="flex-1 flex flex-col justify-center">
+                        <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-amber-500" />
+                          Strategic Verdict
+                        </h3>
+                        <p className="text-slate-600 leading-relaxed text-sm">
+                          {evaluateMutation.data.reason}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <h3 className="font-semibold text-slate-800 mb-2 text-sm uppercase tracking-wider flex items-center gap-2">
-                      <span className="text-amber-500">⚠️</span> Safety Considerations
-                    </h3>
-                    <div className="bg-amber-50 text-amber-900 p-4 rounded-lg border border-amber-100 text-sm">
-                      {evaluateMutation.data.safety_considerations}
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      {/* Angle */}
+                      <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 relative overflow-hidden group hover:bg-indigo-50 transition-colors">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                          <Target className="w-16 h-16 text-indigo-600" />
+                        </div>
+                        <h3 className="font-bold text-indigo-900 mb-3 text-sm uppercase tracking-wider flex items-center gap-2 relative z-10">
+                          <Target className="w-4 h-4" /> Recommended Angle
+                        </h3>
+                        <p className="text-indigo-900/80 text-sm leading-relaxed relative z-10 font-medium">
+                          {evaluateMutation.data.recommended_angle}
+                        </p>
+                      </div>
+
+                      {/* Safety */}
+                      <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100 relative overflow-hidden group hover:bg-amber-50 transition-colors">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                          <ShieldAlert className="w-16 h-16 text-amber-600" />
+                        </div>
+                        <h3 className="font-bold text-amber-900 mb-3 text-sm uppercase tracking-wider flex items-center gap-2 relative z-10">
+                          <ShieldAlert className="w-4 h-4" /> Brand Safety
+                        </h3>
+                        <p className="text-amber-900/80 text-sm leading-relaxed relative z-10 font-medium">
+                          {evaluateMutation.data.safety_considerations}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="pt-4 border-t border-slate-100 flex justify-end">
-                    <Link 
-                      href={`/campaigns?topic=${encodeURIComponent(trends.find((t:any) => t.id === selectedTrend)?.title || '')}`}
-                      className="bg-indigo-600 text-white px-4 py-2 rounded font-medium hover:bg-indigo-700 transition-colors shadow-sm"
-                    >
-                      Start Campaign with this Trend
-                    </Link>
                   </div>
+                ) : null}
+              </div>
+              
+              {/* Footer Action */}
+              {evaluateMutation.isSuccess && evaluateMutation.data && (
+                <div className="p-6 bg-slate-50 border-t border-slate-100 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <p className="text-sm text-slate-500 font-medium">Ready to capitalize on this trend?</p>
+                  <Link 
+                    href={`/campaigns?topic=${encodeURIComponent(trends.find((t:any) => t.id === selectedTrend)?.title || '')}`}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300"
+                  >
+                    Start AI Campaign <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
-              ) : null}
+              )}
+
             </div>
           ) : (
-            <div className="bg-slate-50 rounded-lg border border-slate-200 border-dashed h-full min-h-[300px] flex items-center justify-center p-6 text-center text-slate-500">
-              <div>
-                <div className="text-3xl mb-2">📈</div>
-                <p>Select a trend from the list to see how well it aligns with your brand profile and get AI-generated content angles.</p>
+            <div className="bg-slate-50 rounded-xl border-2 border-slate-200 border-dashed h-full min-h-[500px] flex flex-col items-center justify-center p-8 text-center text-slate-500 group transition-colors hover:bg-slate-100 hover:border-slate-300">
+              <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="w-8 h-8 text-indigo-400" />
               </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Select a Trend</h3>
+              <p className="max-w-md text-slate-500">
+                Choose a trend from the list to see how well it aligns with your brand profile and get AI-generated content angles tailored to your voice.
+              </p>
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TrendsSkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      <div className="h-8 bg-slate-200 rounded w-64" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1 space-y-4">
+          <div className="h-5 bg-slate-200 rounded w-32" />
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="h-28 bg-white border border-slate-200 rounded-xl" />
+          ))}
+        </div>
+        <div className="lg:col-span-2">
+          <div className="h-[600px] bg-white border border-slate-200 rounded-xl" />
         </div>
       </div>
     </div>

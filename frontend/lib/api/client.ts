@@ -34,6 +34,38 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
+export async function downloadAPI(endpoint: string, filename: string) {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  
+  const headers = {
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+
+  const response = await fetch(url, { headers });
+
+  if (!response.ok) {
+    let errorMessage = 'An error occurred while downloading the data.';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.detail || errorMessage;
+    } catch (e) {
+      errorMessage = response.statusText;
+    }
+    throw new Error(errorMessage);
+  }
+
+  const blob = await response.blob();
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(downloadUrl);
+}
+
 // ------------------------------------------------------------------
 // Auth
 // ------------------------------------------------------------------
@@ -153,10 +185,10 @@ export const campaignsApi = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-  generateCampaignContent: (orgId: number, campaignId: number, platforms: string[]) =>
+  generateCampaignContent: (orgId: number, campaignId: number, platforms: string[], format?: string) =>
     fetchAPI(`/organizations/${orgId}/campaigns/${campaignId}/generate-content`, {
       method: 'POST',
-      body: JSON.stringify({ platforms }),
+      body: JSON.stringify({ platforms, format: format || "Standard Post" }),
     }),
 };
 export const contentApi = {
@@ -172,6 +204,11 @@ export const contentApi = {
   editVariant: (orgId: number, contentId: number, variantId: number, data: any) =>
     fetchAPI(`/organizations/${orgId}/content/${contentId}/variants/${variantId}`, {
       method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  publishContent: (orgId: number, data: any) =>
+    fetchAPI(`/organizations/${orgId}/content/publish`, {
+      method: 'POST',
       body: JSON.stringify(data),
     }),
 };
@@ -199,6 +236,8 @@ export const analyticsApi = {
     return fetchAPI(`/organizations/${orgId}/analytics/platforms${qs}`);
   },
   getTopContent: (orgId: number) => fetchAPI(`/organizations/${orgId}/analytics/top-content`),
+  getPostAnalytics: (orgId: number, postId: number) => fetchAPI(`/organizations/${orgId}/analytics/posts/${postId}`),
+  exportAnalytics: (orgId: number) => fetchAPI(`/organizations/${orgId}/analytics/export`),
   getRecommendations: (orgId: number) => fetchAPI(`/organizations/${orgId}/analytics/recommendations`),
   syncAnalytics: (orgId: number) => fetchAPI(`/organizations/${orgId}/analytics/sync`, { method: 'POST' })
 };
@@ -246,3 +285,25 @@ export const trendsApi = {
   getTrends: (orgId: number) => fetchAPI(`/organizations/${orgId}/trends`),
   evaluateTrend: (orgId: number, trendId: string) => fetchAPI(`/organizations/${orgId}/trends/${trendId}/evaluate`, { method: 'POST' }),
 };
+
+// ------------------------------------------------------------------
+// Audiences
+// ------------------------------------------------------------------
+export const audiencesApi = {
+  getAudiences: (orgId: number) => fetchAPI(`/organizations/${orgId}/audiences`),
+  createAudience: (orgId: number, data: any) => fetchAPI(`/organizations/${orgId}/audiences`, { method: 'POST', body: JSON.stringify(data) }),
+  updateAudience: (orgId: number, id: number, data: any) => fetchAPI(`/organizations/${orgId}/audiences/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAudience: (orgId: number, id: number) => fetchAPI(`/organizations/${orgId}/audiences/${id}`, { method: 'DELETE' }),
+  exportAudiences: (orgId: number) => fetchAPI(`/organizations/${orgId}/audiences/export`)
+};
+
+// ------------------------------------------------------------------
+// Leads
+// ------------------------------------------------------------------
+export const leadsApi = {
+  getLeads: (orgId: number) => fetchAPI(`/organizations/${orgId}/leads`),
+  createLead: (orgId: number, data: any) => fetchAPI(`/organizations/${orgId}/leads`, { method: 'POST', body: JSON.stringify(data) }),
+  updateLead: (orgId: number, id: number, data: any) => fetchAPI(`/organizations/${orgId}/leads/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteLead: (orgId: number, id: number) => fetchAPI(`/organizations/${orgId}/leads/${id}`, { method: 'DELETE' })
+};
+

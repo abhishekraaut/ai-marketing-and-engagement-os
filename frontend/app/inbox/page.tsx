@@ -4,19 +4,21 @@ import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { engagementApi } from '@/lib/api/client';
-
+import { MessageSquareText, Search, Filter, RefreshCcw, Sparkles, Send, CheckCircle2, User, Clock, AlertCircle, Edit3, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/ToastContext';
 
 export default function InboxPage() {
   const { currentOrgId: ORG_ID } = useAuth();
-  if (!ORG_ID) return <div>Loading...</div>;
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [platformFilter, setPlatformFilter] = useState('ALL');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [editValue, setEditValue] = useState('');
 
-  // Compute query params based on active filter
   const getParams = () => {
     let params: any = {};
     if (activeFilter === 'NEEDS_REPLY') params.reply_status = 'NEEDS_REPLY';
@@ -28,101 +30,161 @@ export default function InboxPage() {
 
   const { data: engagements = [], isLoading } = useQuery({
     queryKey: ['engagements', ORG_ID, getParams()],
-    queryFn: () => engagementApi.getEngagements(ORG_ID, getParams()),
+    queryFn: () => engagementApi.getEngagements(ORG_ID!, getParams()),
+    enabled: !!ORG_ID
   });
 
   const syncMutation = useMutation({
-    mutationFn: () => engagementApi.syncEngagement(ORG_ID),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['engagements'] })
+    mutationFn: () => engagementApi.syncEngagement(ORG_ID!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast({ title: 'Inbox Synced', description: 'Latest messages fetched successfully.', type: 'success' });
+    }
   });
 
   const generateMutation = useMutation({
-    mutationFn: (id: number) => engagementApi.generateReply(ORG_ID, id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['engagements'] })
+    mutationFn: (id: number) => engagementApi.generateReply(ORG_ID!, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast({ title: 'Reply Drafted', description: 'AI has generated a response.', type: 'success' });
+    }
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, reply }: { id: number, reply: string }) => engagementApi.updateReply(ORG_ID, id, reply),
+    mutationFn: ({ id, reply }: { id: number, reply: string }) => engagementApi.updateReply(ORG_ID!, id, reply),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
       setEditMode(false);
+      toast({ title: 'Reply Updated', description: 'Your changes have been saved.', type: 'success' });
     }
   });
 
   const approveMutation = useMutation({
-    mutationFn: (id: number) => engagementApi.approveReply(ORG_ID, id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['engagements'] })
+    mutationFn: (id: number) => engagementApi.approveReply(ORG_ID!, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast({ title: 'Reply Approved', description: 'Draft is ready to send.', type: 'success' });
+    }
   });
 
   const sendMutation = useMutation({
-    mutationFn: (id: number) => engagementApi.sendReply(ORG_ID, id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['engagements'] })
+    mutationFn: (id: number) => engagementApi.sendReply(ORG_ID!, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast({ title: 'Message Sent', description: 'Your reply has been published.', type: 'success' });
+    }
   });
+
+  if (!ORG_ID) return <InboxSkeleton />;
 
   const selectedItem = engagements.find((e: any) => e.id === selectedId);
 
   return (
-    <div className="max-w-7xl mx-auto p-4 flex flex-col h-[calc(100vh-80px)]">
-      <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col h-[calc(100vh-6rem)] animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Engagement Inbox</h1>
-          <p className="text-slate-500">Manage incoming comments and messages across all platforms.</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <MessageSquareText className="w-6 h-6 text-indigo-600" />
+            Engagement Inbox
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">Manage, filter, and reply to community interactions with AI assistance.</p>
         </div>
-        <div className="flex gap-2">
-          <select 
-            value={platformFilter} 
-            onChange={(e) => setPlatformFilter(e.target.value)}
-            className="border-slate-300 rounded-md text-sm"
-          >
-            <option value="ALL">All Platforms</option>
-            <option value="LINKEDIN">LinkedIn</option>
-            <option value="X">X (Twitter)</option>
-            <option value="INSTAGRAM">Instagram</option>
-            <option value="FACEBOOK">Facebook</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative bg-white rounded-lg shadow-sm border border-slate-200">
+            <Filter className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <select 
+              value={platformFilter} 
+              onChange={(e) => setPlatformFilter(e.target.value)}
+              className="pl-9 pr-8 py-2 bg-transparent border-0 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 cursor-pointer rounded-lg appearance-none"
+            >
+              <option value="ALL">All Platforms</option>
+              <option value="LINKEDIN">LinkedIn</option>
+              <option value="X">X (Twitter)</option>
+              <option value="INSTAGRAM">Instagram</option>
+              <option value="FACEBOOK">Facebook</option>
+            </select>
+          </div>
           <button 
             onClick={() => syncMutation.mutate()}
             disabled={syncMutation.isPending}
-            className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+            className="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 shadow-sm"
           >
-            {syncMutation.isPending ? 'Syncing...' : 'Sync Inbox'}
+            <RefreshCcw className={cn("w-4 h-4", syncMutation.isPending && "animate-spin")} />
+            Sync
           </button>
         </div>
       </div>
 
-      <div className="flex flex-1 gap-6 overflow-hidden">
+      {/* Main Dual-Pane Area */}
+      <div className="flex flex-col md:flex-row flex-1 gap-6 min-h-0">
+        
         {/* Left Pane - List */}
-        <div className="w-1/3 flex flex-col bg-white rounded-lg shadow border border-slate-200">
-          <div className="flex border-b border-slate-200 overflow-x-auto p-2 gap-2">
+        <div className="w-full md:w-5/12 lg:w-1/3 flex flex-col bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden shrink-0">
+          
+          <div className="p-3 border-b border-slate-100 bg-slate-50/50 flex gap-2 overflow-x-auto scrollbar-hide shrink-0">
             <FilterBtn label="All" active={activeFilter === 'ALL'} onClick={() => setActiveFilter('ALL')} />
             <FilterBtn label="Needs Reply" active={activeFilter === 'NEEDS_REPLY'} onClick={() => setActiveFilter('NEEDS_REPLY')} />
             <FilterBtn label="Positive" active={activeFilter === 'POSITIVE'} onClick={() => setActiveFilter('POSITIVE')} />
             <FilterBtn label="Negative" active={activeFilter === 'NEGATIVE'} onClick={() => setActiveFilter('NEGATIVE')} />
           </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-2">
+
+          <div className="flex-1 overflow-y-auto p-3 space-y-2 relative">
             {isLoading ? (
-              <div className="p-4 text-center text-slate-500">Loading engagements...</div>
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                <div className="flex flex-col items-center gap-2 text-slate-400">
+                  <RefreshCcw className="w-6 h-6 animate-spin" />
+                  <span className="text-sm font-medium">Loading inbox...</span>
+                </div>
+              </div>
             ) : engagements.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">
-                No items found. Try syncing or changing filters.
+              <div className="flex flex-col items-center justify-center h-full text-center px-4 py-12">
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                  <MessageSquareText className="w-6 h-6 text-slate-300" />
+                </div>
+                <h3 className="font-semibold text-slate-900 text-sm">Inbox Zero</h3>
+                <p className="text-xs text-slate-500 mt-1">No engagements match your current filters.</p>
               </div>
             ) : (
               engagements.map((item: any) => (
                 <div 
                   key={item.id} 
-                  onClick={() => setSelectedId(item.id)}
-                  className={`p-4 rounded-lg cursor-pointer border ${selectedId === item.id ? 'bg-indigo-50 border-indigo-200' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`}
+                  onClick={() => {
+                    setSelectedId(item.id);
+                    setEditMode(false);
+                  }}
+                  className={cn(
+                    "p-4 rounded-xl cursor-pointer transition-all duration-200 group relative overflow-hidden",
+                    selectedId === item.id 
+                      ? "bg-indigo-50/80 border border-indigo-200 shadow-sm" 
+                      : "bg-white border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30"
+                  )}
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-semibold text-slate-900 text-sm">{item.author_name}</span>
-                    <span className="text-xs text-slate-500">{item.platform}</span>
+                  {selectedId === item.id && (
+                    <div className="absolute left-0 top-0 w-1 h-full bg-indigo-500" />
+                  )}
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 text-xs font-bold">
+                        {item.author_name.charAt(0)}
+                      </div>
+                      <span className="font-bold text-slate-900 text-sm truncate">{item.author_name}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 ml-2">{item.platform}</span>
                   </div>
-                  <p className="text-sm text-slate-700 line-clamp-2">{item.content}</p>
-                  <div className="flex gap-2 mt-2">
+                  <p className={cn(
+                    "text-sm line-clamp-2 leading-relaxed mb-3",
+                    selectedId === item.id ? "text-slate-700" : "text-slate-600"
+                  )}>
+                    {item.content}
+                  </p>
+                  <div className="flex flex-wrap gap-2 items-center">
                     <SentimentBadge sentiment={item.sentiment} />
-                    {item.reply_status === 'REPLIED' && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">REPLIED</span>}
-                    {item.reply_status === 'APPROVED' && <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">APPROVED</span>}
-                    {item.reply_status === 'AI_DRAFTED' && <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-bold">AI DRAFT</span>}
+                    {item.reply_status === 'REPLIED' && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Sent</span>}
+                    {item.reply_status === 'APPROVED' && <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">Approved</span>}
+                    {item.reply_status === 'AI_DRAFTED' && <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><Sparkles className="w-3 h-3"/> Draft</span>}
+                    {item.reply_status === 'NEEDS_REPLY' && <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold">Needs Reply</span>}
                   </div>
                 </div>
               ))
@@ -131,100 +193,166 @@ export default function InboxPage() {
         </div>
 
         {/* Right Pane - Detail */}
-        <div className="w-2/3 bg-white rounded-lg shadow border border-slate-200 flex flex-col">
+        <div className="w-full md:w-7/12 lg:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-[500px] overflow-hidden relative">
           {!selectedItem ? (
-            <div className="flex-1 flex items-center justify-center text-slate-400">
-              Select an engagement to view details
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
+              <MessageSquareText className="w-12 h-12 text-slate-200 mb-4" />
+              <p className="font-medium">Select a conversation to view and reply</p>
             </div>
           ) : (
             <>
-              <div className="p-6 border-b border-slate-200">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900">{selectedItem.author_name}</h2>
-                    <p className="text-slate-500 text-sm">{selectedItem.author_handle} on {selectedItem.platform}</p>
+              <div className="p-6 border-b border-slate-100 bg-white shrink-0">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-bold">
+                      {selectedItem.author_name.charAt(0)}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900 tracking-tight">{selectedItem.author_name}</h2>
+                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <span className="font-medium text-slate-600">{selectedItem.author_handle}</span>
+                        <span>•</span>
+                        <span>{selectedItem.platform}</span>
+                      </div>
+                    </div>
                   </div>
-                  <SentimentBadge sentiment={selectedItem.sentiment} />
+                  <SentimentBadge sentiment={selectedItem.sentiment} size="lg" />
                 </div>
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                  <p className="text-slate-800">{selectedItem.content}</p>
-                  <p className="text-xs text-slate-400 mt-2">Received: {new Date(selectedItem.created_at).toLocaleString()}</p>
+                
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 relative">
+                  <div className="absolute -top-3 left-6 text-2xl">💬</div>
+                  <p className="text-slate-800 text-[15px] leading-relaxed pt-2">{selectedItem.content}</p>
+                  <div className="flex items-center gap-2 text-xs text-slate-400 mt-4 pt-4 border-t border-slate-200/60 font-medium">
+                    <Clock className="w-3.5 h-3.5" />
+                    {new Date(selectedItem.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                  </div>
                 </div>
               </div>
               
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Reply Workflow</h3>
+              <div className="p-6 flex-1 flex flex-col bg-slate-50/30 overflow-y-auto">
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Reply Workflow</h3>
+                  <div className="flex-1 h-px bg-slate-200" />
+                </div>
                 
-                {selectedItem.reply_status === 'PENDING' ? (
-                  <div className="text-center p-8 bg-slate-50 rounded-lg border border-slate-200">
-                    <p className="text-slate-600 mb-4">No reply generated yet.</p>
+                {selectedItem.reply_status === 'PENDING' || selectedItem.reply_status === 'NEEDS_REPLY' ? (
+                  <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-dashed border-slate-300">
+                    <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-4">
+                      <Sparkles className="w-8 h-8 text-purple-500" />
+                    </div>
+                    <h4 className="text-lg font-bold text-slate-900 mb-2">Draft an AI Response</h4>
+                    <p className="text-slate-500 text-sm text-center max-w-sm mb-6">
+                      Generate a contextual, brand-aligned response based on the user's sentiment and your configured guidelines.
+                    </p>
                     <button 
                       onClick={() => generateMutation.mutate(selectedItem.id)}
                       disabled={generateMutation.isPending}
-                      className="bg-purple-600 text-white px-6 py-2 rounded font-medium hover:bg-purple-700 disabled:opacity-50"
+                      className="group relative overflow-hidden bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition-all shadow-md shadow-purple-200 hover:shadow-lg hover:shadow-purple-300 disabled:opacity-50"
                     >
-                      {generateMutation.isPending ? 'Generating...' : '✨ Generate AI Reply'}
+                      <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                      <span className="flex items-center gap-2 relative z-10">
+                        {generateMutation.isPending ? (
+                          <><RefreshCcw className="w-4 h-4 animate-spin" /> Analyzing context...</>
+                        ) : (
+                          <><Sparkles className="w-4 h-4" /> Generate Response</>
+                        )}
+                      </span>
                     </button>
                   </div>
                 ) : (
                   <div className="flex-1 flex flex-col">
-                    <div className="flex-1 bg-indigo-50/50 border border-indigo-100 p-4 rounded-lg flex flex-col mb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-indigo-800 font-semibold text-sm">
-                          {selectedItem.reply_status === 'REPLIED' ? 'Sent Reply' : (selectedItem.human_reply ? 'Edited Reply' : '✨ AI Suggested Reply')}
+                    <div className={cn(
+                      "flex-1 bg-white border p-6 rounded-2xl flex flex-col mb-6 shadow-sm transition-all",
+                      selectedItem.reply_status === 'REPLIED' ? "border-emerald-200 bg-emerald-50/30" : "border-indigo-100 shadow-indigo-100/50"
+                    )}>
+                      <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                          {selectedItem.reply_status === 'REPLIED' ? (
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                          ) : (
+                            <Sparkles className="w-5 h-5 text-indigo-500" />
+                          )}
+                          <span className={cn(
+                            "font-bold text-sm",
+                            selectedItem.reply_status === 'REPLIED' ? "text-emerald-800" : "text-indigo-900"
+                          )}>
+                            {selectedItem.reply_status === 'REPLIED' ? 'Published Reply' : (selectedItem.human_reply ? 'Refined Draft' : 'AI Suggested Draft')}
+                          </span>
+                        </div>
+                        <span className={cn(
+                          "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full",
+                          selectedItem.reply_status === 'REPLIED' ? "bg-emerald-100 text-emerald-700" : "bg-indigo-100 text-indigo-700"
+                        )}>
+                          {selectedItem.reply_status}
                         </span>
-                        <span className="text-xs text-indigo-500 font-medium">{selectedItem.reply_status}</span>
                       </div>
                       
                       {editMode ? (
-                        <div className="flex-1 flex flex-col">
+                        <div className="flex-1 flex flex-col animate-in fade-in zoom-in-95 duration-200">
                           <textarea 
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="flex-1 w-full p-2 border border-indigo-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="flex-1 w-full p-4 border-2 border-indigo-200 rounded-xl text-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 resize-none min-h-[150px] font-medium"
+                            placeholder="Refine the response..."
                           />
-                          <div className="flex justify-end gap-2 mt-2">
-                            <button onClick={() => setEditMode(false)} className="text-slate-500 text-sm hover:text-slate-700">Cancel</button>
+                          <div className="flex justify-end gap-3 mt-4">
+                            <button 
+                              onClick={() => setEditMode(false)} 
+                              className="px-4 py-2 text-slate-500 font-semibold hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1.5"
+                            >
+                              <X className="w-4 h-4" /> Cancel
+                            </button>
                             <button 
                               onClick={() => updateMutation.mutate({ id: selectedItem.id, reply: editValue })}
-                              className="bg-indigo-600 text-white px-4 py-1 rounded text-sm font-medium hover:bg-indigo-700"
-                            >Save</button>
+                              disabled={updateMutation.isPending}
+                              className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5"
+                            >
+                              {updateMutation.isPending ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                              Save Changes
+                            </button>
                           </div>
                         </div>
                       ) : (
-                        <p className="text-slate-800 flex-1 whitespace-pre-wrap">
+                        <p className={cn(
+                          "text-[15px] leading-relaxed flex-1 whitespace-pre-wrap font-medium",
+                          selectedItem.reply_status === 'REPLIED' ? "text-emerald-900/80" : "text-indigo-950/80"
+                        )}>
                           {selectedItem.human_reply || selectedItem.ai_generated_reply}
                         </p>
                       )}
                     </div>
                     
                     {/* Action Bar */}
-                    <div className="flex gap-3 justify-end border-t border-slate-200 pt-4">
+                    <div className="flex flex-wrap gap-3 justify-end shrink-0">
                       {['AI_DRAFTED', 'APPROVED'].includes(selectedItem.reply_status) && !editMode && (
                         <button 
                           onClick={() => {
                             setEditValue(selectedItem.human_reply || selectedItem.ai_generated_reply);
                             setEditMode(true);
                           }}
-                          className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded font-medium hover:bg-slate-50"
-                        >Edit</button>
+                          className="px-6 py-2.5 text-slate-700 bg-white border border-slate-200 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm flex items-center gap-2"
+                        >
+                          <Edit3 className="w-4 h-4" /> Edit
+                        </button>
                       )}
                       
-                      {selectedItem.reply_status === 'AI_DRAFTED' && (
+                      {selectedItem.reply_status === 'AI_DRAFTED' && !editMode && (
                         <button 
                           onClick={() => approveMutation.mutate(selectedItem.id)}
                           disabled={approveMutation.isPending}
-                          className="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700 disabled:opacity-50"
-                        >Approve</button>
+                          className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-sm shadow-blue-200 hover:shadow-md disabled:opacity-50 flex items-center gap-2"
+                        >
+                          <CheckCircle2 className="w-4 h-4" /> Approve Draft
+                        </button>
                       )}
                       
-                      {selectedItem.reply_status === 'APPROVED' && (
+                      {selectedItem.reply_status === 'APPROVED' && !editMode && (
                         <button 
                           onClick={() => sendMutation.mutate(selectedItem.id)}
                           disabled={sendMutation.isPending}
-                          className="bg-green-600 text-white px-6 py-2 rounded font-medium hover:bg-green-700 disabled:opacity-50 flex gap-2 items-center"
+                          className="bg-indigo-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 hover:shadow-lg disabled:opacity-50 flex gap-2 items-center"
                         >
-                          Send Reply 🚀
+                          <Send className="w-4 h-4" /> Publish Reply
                         </button>
                       )}
                     </div>
@@ -243,20 +371,50 @@ function FilterBtn({ label, active, onClick }: { label: string, active: boolean,
   return (
     <button 
       onClick={onClick}
-      className={`whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium border ${active ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+      className={cn(
+        "whitespace-nowrap px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+        active 
+          ? "bg-indigo-600 text-white shadow-sm" 
+          : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+      )}
     >
       {label}
     </button>
   );
 }
 
-function SentimentBadge({ sentiment }: { sentiment: string }) {
-  let color = 'bg-slate-100 text-slate-700';
-  if (sentiment === 'POSITIVE') color = 'bg-green-100 text-green-700';
-  if (sentiment === 'NEGATIVE') color = 'bg-red-100 text-red-700';
+function SentimentBadge({ sentiment, size = 'sm' }: { sentiment: string, size?: 'sm' | 'lg' }) {
+  const isPositive = sentiment === 'POSITIVE';
+  const isNegative = sentiment === 'NEGATIVE';
+  
   return (
-    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${color} uppercase tracking-wider`}>
+    <span className={cn(
+      "font-black uppercase tracking-wider flex items-center gap-1 shrink-0",
+      size === 'sm' ? "text-[10px] px-2 py-0.5 rounded-full" : "text-xs px-3 py-1 rounded-lg",
+      isPositive ? "bg-emerald-100 text-emerald-700" :
+      isNegative ? "bg-rose-100 text-rose-700" :
+      "bg-slate-100 text-slate-600"
+    )}>
+      {isNegative && <AlertCircle className={size === 'sm' ? "w-3 h-3" : "w-4 h-4"} />}
       {sentiment}
     </span>
+  );
+}
+
+function InboxSkeleton() {
+  return (
+    <div className="flex flex-col h-[calc(100vh-6rem)] animate-pulse">
+      <div className="flex justify-between items-center mb-6">
+        <div className="h-8 bg-slate-200 rounded w-64" />
+        <div className="h-10 bg-slate-200 rounded w-48" />
+      </div>
+      <div className="flex flex-1 gap-6">
+        <div className="w-1/3 bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+          <div className="h-10 bg-slate-100 rounded-lg" />
+          {[1,2,3,4].map(i => <div key={i} className="h-24 bg-slate-50 rounded-xl" />)}
+        </div>
+        <div className="w-2/3 bg-white rounded-xl border border-slate-200" />
+      </div>
+    </div>
   );
 }
