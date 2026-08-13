@@ -1,5 +1,5 @@
 import os
-import httpx
+# import httpx
 import logging
 from app.services.connectors.base import SocialConnector
 from app.services.connectors.mock.mock_connector import mock_connector

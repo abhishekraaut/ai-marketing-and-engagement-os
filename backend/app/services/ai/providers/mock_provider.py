@@ -72,8 +72,20 @@ class MockLLMProvider(LLMProvider):
         """
         Synchronous fallback for generating simple content (like replies).
         """
+        lower_prompt = prompt.lower()
+        
+        # Simple heuristic to make mock replies feel more "context-aware"
+        if any(w in lower_prompt for w in ["angry", "disappointed", "bad", "issue", "problem", "hate"]):
+            reply = "We're so sorry to hear about this experience. Please DM us so we can make this right!"
+        elif any(w in lower_prompt for w in ["love", "great", "awesome", "good", "amazing", "best"]):
+            reply = "Thank you so much! We're thrilled you're enjoying it. Let us know if you need anything else! 🚀"
+        elif any(w in lower_prompt for w in ["question", "how", "what", "why", "when", "help"]):
+            reply = "Great question! You can find more details about this on our help center, or send us a DM and we'll walk you through it."
+        else:
+            reply = "Thanks for your comment! We really appreciate the feedback and engagement."
+            
         return {
-            "content": "Thanks for sharing! We appreciate the feedback."
+            "content": reply
         }
 
 mock_llm_provider = MockLLMProvider()

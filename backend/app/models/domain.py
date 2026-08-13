@@ -6,7 +6,8 @@ from app.models.base import TimestampMixin
 from app.models.enums import (
     PlatformEnum, SocialAccountStatusEnum, CampaignStatusEnum, ContentTypeEnum, ContentStatusEnum,
     ScheduleStatusEnum, PublishedPostStatusEnum, EngagementTypeEnum, SentimentEnum,
-    EngagementCategoryEnum, ReplyStatusEnum, EmailCampaignStatusEnum, InsightTypeEnum
+    EngagementCategoryEnum, ReplyStatusEnum, EmailCampaignStatusEnum, InsightTypeEnum,
+    LeadSourceEnum, LeadStatusEnum
 )
 
 class BrandProfile(Base, TimestampMixin):
@@ -161,6 +162,20 @@ class Audience(Base, TimestampMixin):
     organization = relationship("Organization", back_populates="audiences")
     email_campaigns = relationship("EmailCampaign", back_populates="audience")
 
+class Lead(Base, TimestampMixin):
+    __tablename__ = "leads"
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String, nullable=False)
+    email = Column(String)
+    phone = Column(String)
+    source = Column(ENUM(LeadSourceEnum, name="lead_source_enum", create_type=False), nullable=False)
+    status = Column(ENUM(LeadStatusEnum, name="lead_status_enum", create_type=False), nullable=False)
+    conversion_time_hours = Column(Float)
+    notes = Column(Text)
+
+    organization = relationship("Organization", back_populates="leads")
+
 class EmailCampaign(Base, TimestampMixin):
     __tablename__ = "email_campaigns"
     id = Column(Integer, primary_key=True, index=True)
@@ -196,6 +211,7 @@ class AnalyticsSnapshot(Base, TimestampMixin):
     comments = Column(Integer, default=0)
     shares = Column(Integer, default=0)
     clicks = Column(Integer, default=0)
+    url_clicks = Column(Integer, default=0)
     followers = Column(Integer, default=0)
     engagement_rate = Column(Float, default=0.0)
     metadata_ = Column("metadata", JSONB)

@@ -2,7 +2,7 @@ import logging
 from sqlalchemy.orm import Session
 from app.models.domain import EmailCampaign, BrandProfile, Audience, Campaign, AuditLog
 from app.models.enums import EmailCampaignStatusEnum
-from app.services.ai.providers.mock_provider import mock_llm_provider
+from app.services.ai.providers.factory import get_llm_provider
 import json
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,8 @@ class EmailGenerationService:
         Respond with JSON containing: subject, preview_text, body, cta
         """
         
-        ai_output = mock_llm_provider.generate_content(prompt)
+        llm_provider = get_llm_provider()
+        ai_output = llm_provider.generate_content(prompt)
         # Assuming mock provider might return JSON-like string or just text
         content_text = ai_output.get("content", "")
         

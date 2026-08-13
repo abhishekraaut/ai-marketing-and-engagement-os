@@ -19,39 +19,9 @@ def seed_data(db: Session):
     # Check if org exists
     org = db.query(Organization).filter_by(slug=org_slug).first()
     if org:
-        db.query(AuditLog).filter_by(organization_id=org.id).delete()
-        db.query(AIInsight).filter_by(organization_id=org.id).delete()
-        db.query(AnalyticsSnapshot).filter_by(organization_id=org.id).delete()
-        db.query(EmailCampaign).filter_by(organization_id=org.id).delete()
-        db.query(Audience).filter_by(organization_id=org.id).delete()
-        
-        sa_ids = [sa.id for sa in db.query(SocialAccount.id).filter_by(organization_id=org.id)]
-        if sa_ids:
-            db.query(EngagementItem).filter(EngagementItem.social_account_id.in_(sa_ids)).delete(synchronize_session=False)
-            db.query(PublishedPost).filter(PublishedPost.social_account_id.in_(sa_ids)).delete(synchronize_session=False)
-            
-        ci_ids = [ci.id for ci in db.query(ContentItem.id).filter(ContentItem.campaign_id.in_(
-            [c.id for c in db.query(Campaign.id).filter_by(organization_id=org.id)]
-        ))]
-        if ci_ids:
-            pv_ids = [pv.id for pv in db.query(PlatformVariant.id).filter(PlatformVariant.content_item_id.in_(ci_ids))]
-            if pv_ids:
-                db.query(Schedule).filter(Schedule.platform_variant_id.in_(pv_ids)).delete(synchronize_session=False)
-                db.query(PlatformVariant).filter(PlatformVariant.id.in_(pv_ids)).delete(synchronize_session=False)
-            db.query(ContentItem).filter(ContentItem.id.in_(ci_ids)).delete(synchronize_session=False)
-            
-        db.query(Campaign).filter_by(organization_id=org.id).delete(synchronize_session=False)
-        db.query(SocialAccount).filter_by(organization_id=org.id).delete(synchronize_session=False)
-        db.query(BrandProfile).filter_by(organization_id=org.id).delete(synchronize_session=False)
-        db.query(OrganizationMember).filter_by(organization_id=org.id).delete(synchronize_session=False)
-        db.query(Organization).filter_by(id=org.id).delete(synchronize_session=False)
-        
-    db.query(User).filter(User.email.in_([
-        "founder@aisaastas.com", 
-        "admin@aisaastas.com", 
-        "member@aisaastas.com"
-    ])).delete()
-    db.commit()
+        print("Database is already seeded. Skipping.")
+        return
+
 
     hashed_pw = get_password_hash("password123")
 

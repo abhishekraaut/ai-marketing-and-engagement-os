@@ -12,6 +12,7 @@ class PlatformEnum(str, enum.Enum):
     INSTAGRAM = "INSTAGRAM"
     FACEBOOK = "FACEBOOK"
     X = "X"
+    YOUTUBE = "YOUTUBE"
 
 class SocialAccountStatusEnum(str, enum.Enum):
     CONNECTED = "CONNECTED"
@@ -94,3 +95,19 @@ class InsightTypeEnum(str, enum.Enum):
     TREND = "TREND"
     CONTENT = "CONTENT"
     ENGAGEMENT = "ENGAGEMENT"
+
+class LeadSourceEnum(str, enum.Enum):
+    SOCIAL = "SOCIAL"
+    EMAIL = "EMAIL"
+    WEBSITE = "WEBSITE"
+    REFERRAL = "REFERRAL"
+    OTHER = "OTHER"
+
+class LeadStatusEnum(str, enum.Enum):
+    NEW = "NEW"
+    CONTACTED = "CONTACTED"
+    QUALIFIED = "QUALIFIED"
+    UNQUALIFIED = "UNQUALIFIED"
+    CONVERTED = "CONVERTED"
+    LOST = "LOST"
+

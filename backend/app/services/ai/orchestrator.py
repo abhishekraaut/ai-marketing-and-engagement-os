@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.domain import BrandProfile, Campaign
-from app.services.ai.providers.mock_provider import mock_provider
+from app.services.ai.providers.factory import get_llm_provider
 from app.services.ai.prompts.content_generation import PromptBuilder
 from app.services.ai.schemas import GeneratedCampaignContent
 
@@ -37,7 +37,8 @@ class AIOrchestrator:
 
         # 4. Call LLM Provider (Mock for now, could be swapped based on env vars)
         try:
-            generated_content = await mock_provider.generate(
+            llm_provider = get_llm_provider()
+            generated_content = await llm_provider.generate(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 response_schema=GeneratedCampaignContent

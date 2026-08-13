@@ -2,7 +2,7 @@ import logging
 from sqlalchemy.orm import Session
 from app.models.domain import EngagementItem, BrandProfile, AuditLog
 from app.models.enums import ReplyStatusEnum
-from app.services.ai.providers.mock_provider import mock_llm_provider
+from app.services.ai.providers.factory import get_llm_provider
 # In a real app we'd inject the actual LLMProvider based on tenant config
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,8 @@ class ReplyService:
         """
         
         # We use the mock LLM for deterministic speed
-        ai_output = mock_llm_provider.generate_content(prompt)
+        llm_provider = get_llm_provider()
+        ai_output = llm_provider.generate_content(prompt)
         ai_reply = ai_output.get("content", "Thanks for your feedback!")
         
         # Validation

@@ -1,7 +1,7 @@
 import json
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from app.services.ai.providers.mock_provider import mock_llm_provider
+from app.services.ai.providers.factory import get_llm_provider
 from app.services.analytics.analytics_aggregator import analytics_aggregator
 from sqlalchemy.orm import Session
 
@@ -18,7 +18,7 @@ class RecommendationService:
         overview = analytics_aggregator.get_overview(db, org_id)
         platforms = analytics_aggregator.get_platform_performance(db, org_id)
         top = analytics_aggregator.get_top_content(db, org_id, limit=3)
-        
+
         if overview["posts_published"] == 0:
             return []
 

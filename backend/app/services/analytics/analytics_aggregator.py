@@ -118,4 +118,42 @@ class AnalyticsAggregator:
             })
         return result
 
+    def get_post_analytics(self, db: Session, org_id: int, post_id: int) -> dict:
+        row = db.query(
+            PublishedPost.id.label('published_post_id'),
+            AnalyticsSnapshot.platform,
+            func.sum(AnalyticsSnapshot.impressions).label('impressions'),
+            func.sum(AnalyticsSnapshot.reach).label('reach'),
+            func.sum(AnalyticsSnapshot.likes).label('likes'),
+            func.sum(AnalyticsSnapshot.comments).label('comments'),
+            func.sum(AnalyticsSnapshot.shares).label('shares'),
+            func.sum(AnalyticsSnapshot.clicks).label('clicks'),
+            func.sum(AnalyticsSnapshot.url_clicks).label('url_clicks'),
+            func.sum(AnalyticsSnapshot.followers).label('followers')
+        ).select_from(AnalyticsSnapshot).join(PublishedPost).filter(
+            AnalyticsSnapshot.organization_id == org_id,
+            PublishedPost.id == post_id
+        ).group_by(
+            PublishedPost.id, AnalyticsSnapshot.platform
+        ).first()
+
+        if not row:
+            return None
+
+        imp = row.impressions or 0
+        clicks = row.clicks or 0
+        return {
+            "published_post_id": row.published_post_id,
+            "platform": row.platform.value if row.platform else "UNKNOWN",
+            "impressions": imp,
+            "reach": row.reach or 0,
+            "likes": row.likes or 0,
+            "comments": row.comments or 0,
+            "shares": row.shares or 0,
+            "clicks": clicks,
+            "url_clicks": row.url_clicks or 0,
+            "followers": row.followers or 0,
+            "conversion_rate": round((clicks / imp * 100) if imp > 0 else 0, 2)
+        }
+
 analytics_aggregator = AnalyticsAggregator()

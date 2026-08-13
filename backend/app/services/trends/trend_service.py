@@ -2,7 +2,7 @@ import json
 from sqlalchemy.orm import Session
 from app.models.domain import BrandProfile
 from app.schemas.trend import Trend, TrendEvaluationResponse
-from app.services.ai.providers.mock_provider import mock_provider
+from app.services.ai.providers.factory import get_llm_provider
 
 MOCK_TRENDS = [
     Trend(id="t1", title="AI Regulation", description="New regulations around AI usage in marketing and data privacy.", category="Industry"),
@@ -43,7 +43,8 @@ class TrendService:
 
         try:
             # We use mock provider for a structured JSON response
-            ai_output = await mock_provider.generate(
+            llm_provider = get_llm_provider()
+            ai_output = await llm_provider.generate(
                 system_prompt="You are a marketing strategist. Return JSON with keys: relevance_score (0-100), reason, recommended_angle, safety_considerations",
                 user_prompt=prompt,
                 response_schema=TrendEvaluationResponse

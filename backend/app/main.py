@@ -12,7 +12,9 @@ from app.api.v1 import (
     engagement,
     email,
     trends,
-    auth
+    auth,
+    audiences,
+    leads
 )
 
 app = FastAPI(title="AI Marketing & Engagement OS")
@@ -37,6 +39,8 @@ app.include_router(analytics.router, prefix="/api/v1", tags=["analytics"])
 app.include_router(engagement.router, prefix="/api/v1", tags=["engagement"])
 app.include_router(email.router, prefix="/api/v1", tags=["email"])
 app.include_router(trends.router, prefix="/api/v1/organizations/{organization_id}/trends", tags=["trends"])
+app.include_router(audiences.router, prefix="/api/v1", tags=["audiences"])
+app.include_router(leads.router, prefix="/api/v1", tags=["leads"])
 
 @app.get("/")
 def read_root():
