@@ -19,9 +19,16 @@ from app.api.v1 import (
 
 app = FastAPI(title="AI Marketing & Engagement OS")
 
+import os
+frontend_url = os.environ.get("FRONTEND_URL", "*")
+allow_origins = [frontend_url] if frontend_url != "*" else ["*"]
+# Also allow localhost for development
+if "http://localhost:3000" not in allow_origins:
+    allow_origins.append("http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

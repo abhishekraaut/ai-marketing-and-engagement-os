@@ -16,48 +16,65 @@ class MockLLMProvider(LLMProvider):
         This allows the app to run without an actual LLM backend during dev/testing.
         """
         
-        # We parse the user_prompt slightly to guess the platforms requested.
-        platforms_requested = ["LINKEDIN", "X", "FACEBOOK", "INSTAGRAM"]
-        if "Platform:" in user_prompt:
-            # Try to narrow it down if the prompt specifies
-            for p in platforms_requested:
-                if p in user_prompt:
-                    pass # We'll just generate them all based on the prompt string loosely or fall back
+        import re
+        
+        # Extract context from user_prompt
+        topic_match = re.search(r'Topic: (.*?)\n', user_prompt)
+        topic = topic_match.group(1).strip() if topic_match else "our latest strategic initiative"
+        
+        brand_match = re.search(r'Brand Name: (.*?)\n', user_prompt)
+        brand = brand_match.group(1).strip() if brand_match else "Our Brand"
 
-        # Create dummy variants for all 4 platforms to be safe, filtering will happen later if needed.
-        variants = [
-            GeneratedPlatformVariant(
+        platforms_requested = ["LINKEDIN", "X", "FACEBOOK", "INSTAGRAM", "YOUTUBE"]
+        requested = [p for p in platforms_requested if p in user_prompt]
+        if not requested:
+            requested = platforms_requested
+
+        variants = []
+        if "LINKEDIN" in requested:
+            variants.append(GeneratedPlatformVariant(
                 platform="LINKEDIN",
                 title="Professional Update",
-                content="Excited to announce our latest strategic initiative. We believe data-driven decisions are the future of marketing. Our team has worked hard to bring this to life.",
+                content=f"Excited to announce {brand}'s latest focus on {topic}. We believe data-driven decisions and staying ahead of trends are the future of marketing. Our team has worked hard to bring this to life.",
                 cta="Read our whitepaper today",
                 hashtags=["#B2B", "#MarketingStrategy", "#Innovation"],
                 engagement_score=85
-            ),
-            GeneratedPlatformVariant(
+            ))
+        if "X" in requested:
+            variants.append(GeneratedPlatformVariant(
                 platform="X",
-                content="Big news! Data-driven decisions are the future. Check out our latest initiative and empower your team! 🚀",
+                content=f"Big news from {brand}! We're diving into {topic}. Check out our latest initiative and empower your team! 🚀",
                 cta="Link in bio",
                 hashtags=["#Marketing", "#AI", "#Tech"],
                 engagement_score=92
-            ),
-            GeneratedPlatformVariant(
+            ))
+        if "FACEBOOK" in requested:
+            variants.append(GeneratedPlatformVariant(
                 platform="FACEBOOK",
                 title="Community Announcement",
-                content="Hey community! We've been working hard on something special just for you. Marketing is changing, and we want you to be part of the journey.",
+                content=f"Hey community! We've been working hard on something special just for you regarding {topic}. Marketing is changing, and {brand} wants you to be part of the journey.",
                 cta="Join the discussion in our group",
                 hashtags=["#Community", "#Growth"],
                 engagement_score=75
-            ),
-            GeneratedPlatformVariant(
+            ))
+        if "INSTAGRAM" in requested:
+            variants.append(GeneratedPlatformVariant(
                 platform="INSTAGRAM",
-                content="Visuals speak louder than words. Swipe left to see how we're changing the game. 📸✨",
+                content=f"Visuals speak louder than words. Swipe left to see how {brand} is changing the game with {topic}. 📸✨",
                 caption="Behind the scenes of our latest launch.",
                 cta="Link in bio",
                 hashtags=["#MarketingLife", "#LaunchDay", "#InstaGood"],
                 engagement_score=88
-            )
-        ]
+            ))
+        if "YOUTUBE" in requested:
+            variants.append(GeneratedPlatformVariant(
+                platform="YOUTUBE",
+                title=f"{brand} Presents: A Deep Dive into {topic}",
+                content=f"Welcome to our channel! In this video, we break down {topic} and what it means for the future. Don't forget to like and subscribe!",
+                cta="Subscribe for more",
+                hashtags=["#VideoMarketing", "#DeepDive"],
+                engagement_score=95
+            ))
         
         # We assume the schema requested is GeneratedCampaignContent
         if response_schema == GeneratedCampaignContent:

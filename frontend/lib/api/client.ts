@@ -185,6 +185,11 @@ export const campaignsApi = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+  updateCampaign: (orgId: number, campaignId: number, data: Partial<Campaign>) => 
+    fetchAPI(`/organizations/${orgId}/campaigns/${campaignId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
   generateCampaignContent: (orgId: number, campaignId: number, platforms: string[], format?: string) =>
     fetchAPI(`/organizations/${orgId}/campaigns/${campaignId}/generate-content`, {
       method: 'POST',
@@ -283,7 +288,9 @@ export const emailApi = {
 // ------------------------------------------------------------------
 export const trendsApi = {
   getTrends: (orgId: number) => fetchAPI(`/organizations/${orgId}/trends`),
-  evaluateTrend: (orgId: number, trendId: string) => fetchAPI(`/organizations/${orgId}/trends/${trendId}/evaluate`, { method: 'POST' }),
+  evaluateTrend: (orgId: number, trendId: number) => fetchAPI(`/organizations/${orgId}/trends/${trendId}/evaluate`, { method: 'POST' }),
+  createTrend: (orgId: number, data: any) => fetchAPI(`/organizations/${orgId}/trends`, { method: 'POST', body: JSON.stringify(data) }),
+  fetchLiveTrends: (orgId: number) => fetchAPI(`/organizations/${orgId}/trends/fetch`, { method: 'POST' }),
 };
 
 // ------------------------------------------------------------------

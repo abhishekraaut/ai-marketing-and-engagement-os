@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trendsApi } from '@/lib/api/client';
 import Link from 'next/link';
-import { TrendingUp, Sparkles, AlertTriangle, ArrowRight, Zap, Target, ShieldAlert } from 'lucide-react';
+import { TrendingUp, Sparkles, AlertTriangle, ArrowRight, Zap, Target, ShieldAlert, Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastContext';
 
 export default function TrendsPage() {
   const { currentOrgId: ORG_ID } = useAuth();
-  const [selectedTrend, setSelectedTrend] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [selectedTrend, setSelectedTrend] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ title: '', description: '', category: 'Industry', source_url: '' });
   const { toast } = useToast();
 
   const { data: trends = [], isLoading } = useQuery({
@@ -21,17 +24,38 @@ export default function TrendsPage() {
   });
 
   const evaluateMutation = useMutation({
-    mutationFn: (trendId: string) => trendsApi.evaluateTrend(ORG_ID!, trendId),
+    mutationFn: (trendId: number) => trendsApi.evaluateTrend(ORG_ID!, trendId),
     onError: () => {
       toast({ title: 'Evaluation Failed', description: 'Failed to analyze trend against your Brand Brain. Please ensure it is configured.', type: 'error' });
     }
   });
 
-  if (!ORG_ID) return <TrendsSkeleton />;
+  const fetchLiveMutation = useMutation({
+    mutationFn: () => trendsApi.fetchLiveTrends(ORG_ID!),
+    onSuccess: (newTrends: any) => {
+      queryClient.invalidateQueries({ queryKey: ['trends', ORG_ID] });
+      toast({ title: 'Trends Fetched', description: `Successfully discovered ${newTrends.length} new trends via AI.`, type: 'success' });
+    },
+    onError: () => {
+      toast({ title: 'Fetch Failed', description: 'Failed to fetch live trends via AI.', type: 'error' });
+    }
+  });
 
-  if (isLoading) {
-    return <TrendsSkeleton />;
-  }
+  const createTrendMutation = useMutation({
+    mutationFn: (data: any) => trendsApi.createTrend(ORG_ID!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trends', ORG_ID] });
+      toast({ title: 'Trend Added', description: 'Successfully added custom trend.', type: 'success' });
+      setIsModalOpen(false);
+      setFormData({ title: '', description: '', category: 'Industry', source_url: '' });
+    },
+    onError: () => {
+      toast({ title: 'Add Failed', description: 'Failed to add custom trend.', type: 'error' });
+    }
+  });
+
+  if (!ORG_ID) return <TrendsSkeleton />;
+  if (isLoading) return <TrendsSkeleton />;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -42,6 +66,23 @@ export default function TrendsPage() {
             Trend Discovery
           </h1>
           <p className="text-slate-500 mt-1">Discover trending topics and let AI evaluate their relevance to your Brand Brain.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Custom Trend
+          </button>
+          <button 
+            onClick={() => fetchLiveMutation.mutate()}
+            disabled={fetchLiveMutation.isPending}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-600/20 disabled:opacity-50"
+          >
+            <Sparkles className="w-4 h-4" />
+            {fetchLiveMutation.isPending ? 'Fetching...' : 'Fetch Live News (AI)'}
+          </button>
         </div>
       </div>
 
@@ -236,6 +277,75 @@ export default function TrendsPage() {
           )}
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900">Add Custom Trend</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
+                <input 
+                  type="text" 
+                  value={formData.title} 
+                  onChange={e => setFormData({...formData, title: e.target.value})} 
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  placeholder="e.g. The rise of AI in Marketing"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                <select 
+                  value={formData.category} 
+                  onChange={e => setFormData({...formData, category: e.target.value})} 
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+                  <option value="Industry">Industry</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Security">Security</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                <textarea 
+                  value={formData.description} 
+                  onChange={e => setFormData({...formData, description: e.target.value})} 
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none min-h-[100px]"
+                  placeholder="Detailed description of the trend..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Source URL (Optional)</label>
+                <input 
+                  type="text" 
+                  value={formData.source_url} 
+                  onChange={e => setFormData({...formData, source_url: e.target.value})} 
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  placeholder="https://news.com/article"
+                />
+              </div>
+            </div>
+            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">
+                Cancel
+              </button>
+              <button 
+                onClick={() => createTrendMutation.mutate(formData)}
+                disabled={createTrendMutation.isPending || !formData.title || !formData.description}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {createTrendMutation.isPending ? 'Saving...' : 'Save Trend'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -32,6 +32,7 @@ class Organization(Base, TimestampMixin):
     audit_logs = relationship("AuditLog", back_populates="organization", cascade="all, delete-orphan")
     social_accounts = relationship("SocialAccount", back_populates="organization", cascade="all, delete-orphan")
     leads = relationship("Lead", back_populates="organization", cascade="all, delete-orphan")
+    trends = relationship("Trend", back_populates="organization", cascade="all, delete-orphan")
 
 class OrganizationMember(Base, TimestampMixin):
     __tablename__ = "organization_members"

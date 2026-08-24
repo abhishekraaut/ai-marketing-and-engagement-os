@@ -255,3 +255,14 @@ class AuditLog(Base, TimestampMixin):
     __table_args__ = (
         Index("ix_audit_org_created_at", "organization_id", "created_at"),
     )
+
+class Trend(Base, TimestampMixin):
+    __tablename__ = "trends"
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    category = Column(String)
+    source_url = Column(String)
+    
+    organization = relationship("Organization", back_populates="trends")

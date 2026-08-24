@@ -67,8 +67,10 @@ class PublishingService:
             # Call Mock Connector
             self._log_audit(db, org_id, "POST_PUBLISH_STARTED", "Schedule", schedule.id)
             
-            # Using mock_connector always for Phase 5
-            connector_res = mock_connector.publish_post(
+            from app.services.connectors.factory import get_connector
+            connector = get_connector(account.platform.value)
+            
+            connector_res = connector.publish_post(
                 content=variant.content,
                 media_urls=variant.media_urls,
                 account_name=account.account_name if account.account_name != "ERROR" else "ERROR"

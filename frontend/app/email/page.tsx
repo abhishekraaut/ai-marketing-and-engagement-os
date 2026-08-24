@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { emailApi, campaignsApi } from '@/lib/api/client';
+import { emailApi, campaignsApi, audiencesApi } from '@/lib/api/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Plus, Users, LayoutTemplate, Clock, Send, Sparkles, X, ChevronRight, CheckCircle2 } from 'lucide-react';
@@ -17,7 +17,7 @@ export default function EmailPage() {
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ name: '', audience_id: 1, campaign_id: '' });
+  const [formData, setFormData] = useState<{name: string, audience_id: number | null, campaign_id: string}>({ name: '', audience_id: null, campaign_id: '' });
 
   const { data: emails = [], isLoading } = useQuery({
     queryKey: ['emails', ORG_ID],
@@ -28,6 +28,12 @@ export default function EmailPage() {
   const { data: campaigns = [] } = useQuery({
     queryKey: ['campaigns', ORG_ID],
     queryFn: () => campaignsApi.getCampaigns(ORG_ID!),
+    enabled: !!ORG_ID
+  });
+
+  const { data: audiences = [] } = useQuery({
+    queryKey: ['audiences', ORG_ID],
+    queryFn: () => audiencesApi.getAudiences(ORG_ID!),
     enabled: !!ORG_ID
   });
 
@@ -196,12 +202,13 @@ export default function EmailPage() {
                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Target Audience</label>
                 <select 
                   className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium bg-white transition-all appearance-none cursor-pointer"
-                  value={formData.audience_id}
+                  value={formData.audience_id || ''}
                   onChange={(e) => setFormData({...formData, audience_id: Number(e.target.value)})}
                 >
-                  <option value={1}>Newsletter Subscribers</option>
-                  <option value={2}>Existing Customers</option>
-                  <option value={3}>Leads (Top of Funnel)</option>
+                  <option value="" disabled>Select an audience</option>
+                  {audiences?.map((a: any) => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
                 </select>
               </div>
               
@@ -238,7 +245,7 @@ export default function EmailPage() {
                   audience_id: formData.audience_id,
                   campaign_id: formData.campaign_id ? Number(formData.campaign_id) : null
                 })}
-                disabled={!formData.name || createMutation.isPending}
+                disabled={!formData.name || !formData.audience_id || createMutation.isPending}
                 className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 shadow-sm shadow-indigo-200 transition-all"
               >
                 {createMutation.isPending ? (

@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { campaignsApi, contentApi, schedulesApi, socialAccountsApi, Campaign } from '@/lib/api/client';
+import { campaignsApi, contentApi, schedulesApi, socialAccountsApi, trendsApi, Campaign } from '@/lib/api/client';
 import { addDays, formatISO } from 'date-fns';
 import { useToast } from '@/components/ui/ToastContext';
-import { Megaphone, Calendar, Clock, CheckCircle, XCircle, Sparkles, Send, Layout, Layers, Loader2, Plus, ArrowRight, Activity, MessageSquare } from 'lucide-react';
+import { Megaphone, Calendar, Clock, CheckCircle, XCircle, Sparkles, Send, Layout, Layers, Loader2, Plus, ArrowRight, Activity, MessageSquare, TrendingUp } from 'lucide-react';
 
 const AVAILABLE_PLATFORMS = ['LINKEDIN', 'INSTAGRAM', 'FACEBOOK', 'X', 'YOUTUBE'];
 const AVAILABLE_FORMATS = ['Standard Post', 'Short Video/Reel', 'Long-form Video', 'Thread/Carousel', 'Story'];
@@ -26,6 +26,13 @@ export default function CampaignsPage() {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>('LINKEDIN');
   const [scheduleData, setScheduleData] = useState({ date: '', time: '' });
+  const [selectedTrends, setSelectedTrends] = useState<string[]>([]);
+
+  const { data: trends } = useQuery({
+    queryKey: ['trends', ORG_ID],
+    queryFn: () => trendsApi.getTrends(ORG_ID!),
+    enabled: !!ORG_ID
+  });
 
   const { data: accounts } = useQuery({
     queryKey: ['social-accounts', ORG_ID],
@@ -59,8 +66,13 @@ export default function CampaignsPage() {
   });
 
   const generateMutation = useMutation({
-    mutationFn: (data: { campaignId: number, platforms: string[], format: string }) =>
-      campaignsApi.generateCampaignContent(ORG_ID!, data.campaignId, data.platforms, data.format),
+    mutationFn: async (data: { campaignId: number, platforms: string[], format: string }) => {
+      if (selectedTrends.length > 0 && selectedCampaign) {
+        const appendedTopic = `${selectedCampaign.topic || ''} (Augmented with Trends: ${selectedTrends.join(', ')})`.trim();
+        await campaignsApi.updateCampaign(ORG_ID!, data.campaignId, { topic: appendedTopic });
+      }
+      return campaignsApi.generateCampaignContent(ORG_ID!, data.campaignId, data.platforms, data.format);
+    },
     onSuccess: (data) => {
       setGeneratedContent(data);
       if (data.variants && data.variants.length > 0) {
@@ -100,11 +112,16 @@ export default function CampaignsPage() {
 
   const handleAction = (action: string, variant: any) => {
     if (action === 'schedule') {
-       if (!scheduleData.date || !scheduleData.time) {
-          toast({ title: 'Missing Date/Time', description: 'Please pick a date and time', type: 'error' });
-          return;
+       let dt;
+       if (variant.postNow) {
+          dt = new Date();
+       } else {
+          if (!scheduleData.date || !scheduleData.time) {
+             toast({ title: 'Missing Date/Time', description: 'Please pick a date and time', type: 'error' });
+             return;
+          }
+          dt = new Date(`${scheduleData.date}T${scheduleData.time}`);
        }
-       const dt = new Date(`${scheduleData.date}T${scheduleData.time}`);
        actionMutation.mutate({
          action, 
          contentId: generatedContent.content_item_id, 
@@ -194,7 +211,7 @@ export default function CampaignsPage() {
                   <p className="text-sm text-slate-500">Campaign: <span className="font-semibold text-slate-700">{selectedCampaign.name}</span></p>
                 </div>
               </div>
-              <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); }} className="text-slate-400 hover:text-slate-700 hover:bg-slate-200 p-2 rounded-full transition-colors"><XCircle className="w-6 h-6" /></button>
+              <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); setSelectedTrends([]); }} className="text-slate-400 hover:text-slate-700 hover:bg-slate-200 p-2 rounded-full transition-colors"><XCircle className="w-6 h-6" /></button>
             </div>
             
             <div className="p-6 flex-1 overflow-y-auto bg-slate-50/30">
@@ -228,8 +245,35 @@ export default function CampaignsPage() {
                       ))}
                     </select>
                   </div>
+
+                  <div className="pt-4 border-t border-slate-100 text-left">
+                    <div className="flex items-center gap-2 mb-4">
+                      <TrendingUp className="w-5 h-5 text-indigo-600" />
+                      <h3 className="text-xl font-bold text-slate-800">Augment with Trending Tags</h3>
+                    </div>
+                    <p className="text-slate-500 mb-4 text-sm">Select live trends to inject into the AI content context.</p>
+                    {trends && trends.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {trends.map((t: any) => (
+                          <button
+                            key={t.id}
+                            onClick={() => setSelectedTrends(prev => prev.includes(t.title) ? prev.filter(x => x !== t.title) : [...prev, t.title])}
+                            className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all border ${
+                              selectedTrends.includes(t.title) 
+                                ? 'bg-indigo-100 text-indigo-700 border-indigo-200' 
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            #{t.title.replace(/\s+/g, '')}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-slate-500 italic">Loading trends...</div>
+                    )}
+                  </div>
                   
-                  <div className="pt-8">
+                  <div className="pt-8 border-t border-slate-100">
                     <button
                       onClick={() => generateMutation.mutate({ campaignId: selectedCampaign.id, platforms: selectedPlatforms, format: selectedFormat })}
                       disabled={selectedPlatforms.length === 0}
@@ -294,12 +338,24 @@ export default function CampaignsPage() {
                               </>
                             )}
                             {v.status === 'APPROVED' && (
-                              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
-                                <input type="date" className="text-sm bg-transparent border-r border-slate-200 px-3 outline-none" onChange={e => setScheduleData({...scheduleData, date: e.target.value})} />
-                                <input type="time" className="text-sm bg-transparent px-3 outline-none" onChange={e => setScheduleData({...scheduleData, time: e.target.value})} />
-                                <button onClick={() => handleAction('schedule', v)} className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
-                                  <Clock className="w-4 h-4" /> Schedule
-                                </button>
+                              <div className="flex flex-col gap-2 bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+                                <div className="flex items-center gap-2">
+                                  <button onClick={() => handleAction('schedule', { ...v, postNow: true })} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition-colors">
+                                    <Send className="w-4 h-4" /> Post Now
+                                  </button>
+                                </div>
+                                <div className="relative flex items-center py-1">
+                                  <div className="flex-grow border-t border-slate-200"></div>
+                                  <span className="flex-shrink-0 mx-2 text-xs text-slate-400">or schedule for later</span>
+                                  <div className="flex-grow border-t border-slate-200"></div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <input type="date" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({...scheduleData, date: e.target.value})} />
+                                  <input type="time" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({...scheduleData, time: e.target.value})} />
+                                  <button onClick={() => handleAction('schedule', v)} className="flex items-center justify-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
+                                    <Clock className="w-4 h-4" /> Schedule
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -335,7 +391,7 @@ export default function CampaignsPage() {
             <div className="px-6 py-4 border-t border-slate-200 bg-white flex justify-between items-center rounded-b-2xl">
               <span className="text-sm text-slate-500 flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-400" /> AI-generated content follows Brand Guardrails</span>
               <div className="flex space-x-3">
-                <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); }} className="px-5 py-2.5 text-slate-700 font-medium hover:bg-slate-100 rounded-lg transition-colors">Close Workspace</button>
+                <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); setSelectedTrends([]); }} className="px-5 py-2.5 text-slate-700 font-medium hover:bg-slate-100 rounded-lg transition-colors">Close Workspace</button>
                 {!generatedContent && (
                   <button onClick={() => generateMutation.mutate({ campaignId: selectedCampaign.id, platforms: selectedPlatforms, format: selectedFormat })} disabled={generateMutation.isPending || selectedPlatforms.length === 0} className="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center gap-2">
                     Generate Flow <ArrowRight className="w-4 h-4" />

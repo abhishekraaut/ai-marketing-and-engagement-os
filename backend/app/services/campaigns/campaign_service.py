@@ -91,7 +91,9 @@ class CampaignService:
                     status=ContentStatusEnum.DRAFT
                 )
                 db.add(variant)
+                db.flush()
                 variants_out.append({
+                    "id": variant.id,
                     "platform": v.platform,
                     "title": v.title,
                     "content": v.content,
@@ -107,7 +109,7 @@ class CampaignService:
                 action="CONTENT_GENERATED",
                 entity_type="ContentItem",
                 entity_id=str(content_item.id),
-                metadata_info={"platforms": platforms}
+                metadata_={"platforms": platforms}
             )
             db.add(audit_log)
 

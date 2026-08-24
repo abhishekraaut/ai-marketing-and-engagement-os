@@ -30,9 +30,6 @@ class AnalyticsSyncService:
                     AnalyticsSnapshot.organization_id == org_id
                 ).order_by(AnalyticsSnapshot.snapshot_date.desc()).first()
 
-                if existing and existing.snapshot_date.date() == today:
-                    continue # Already synced today
-
                 platform_name = post.social_account.platform.value
                 connector = get_connector(platform_name)
                 
@@ -41,22 +38,33 @@ class AnalyticsSyncService:
                     platform_name=platform_name
                 )
 
-                snapshot = AnalyticsSnapshot(
-                    organization_id=org_id,
-                    campaign_id=post.schedule.platform_variant.content_item.campaign_id,
-                    published_post_id=post.id,
-                    platform=post.social_account.platform,
-                    snapshot_date=datetime.now(timezone.utc),
-                    impressions=metrics.get("impressions", 0),
-                    reach=metrics.get("reach", 0),
-                    likes=metrics.get("likes", 0),
-                    comments=metrics.get("comments", 0),
-                    shares=metrics.get("shares", 0),
-                    clicks=metrics.get("clicks", 0),
-                    engagement_rate=metrics.get("engagement_rate", 0.0),
-                )
-                db.add(snapshot)
-                sync_count += 1
+                if existing and existing.snapshot_date.date() == today:
+                    existing.impressions = metrics.get("impressions", 0)
+                    existing.reach = metrics.get("reach", 0)
+                    existing.likes = metrics.get("likes", 0)
+                    existing.comments = metrics.get("comments", 0)
+                    existing.shares = metrics.get("shares", 0)
+                    existing.clicks = metrics.get("clicks", 0)
+                    existing.engagement_rate = metrics.get("engagement_rate", 0.0)
+                    existing.snapshot_date = datetime.now(timezone.utc)
+                    sync_count += 1
+                else:
+                    snapshot = AnalyticsSnapshot(
+                        organization_id=org_id,
+                        campaign_id=post.schedule.platform_variant.content_item.campaign_id,
+                        published_post_id=post.id,
+                        platform=post.social_account.platform,
+                        snapshot_date=datetime.now(timezone.utc),
+                        impressions=metrics.get("impressions", 0),
+                        reach=metrics.get("reach", 0),
+                        likes=metrics.get("likes", 0),
+                        comments=metrics.get("comments", 0),
+                        shares=metrics.get("shares", 0),
+                        clicks=metrics.get("clicks", 0),
+                        engagement_rate=metrics.get("engagement_rate", 0.0),
+                    )
+                    db.add(snapshot)
+                    sync_count += 1
 
             if sync_count > 0:
                 log = AuditLog(

@@ -16,7 +16,9 @@ class EngagementSyncService:
             sync_count = 0
             
             for post in posts:
-                comments = mock_connector.get_comments(post.external_post_id)
+                from app.services.connectors.factory import get_connector
+                connector = get_connector(post.social_account.platform.value)
+                comments = connector.get_comments(post.external_post_id)
                 for comment in comments:
                     ext_id = comment["external_engagement_id"]
                     

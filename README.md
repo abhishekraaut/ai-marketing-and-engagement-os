@@ -103,7 +103,7 @@ If you prefer to run the services directly on your machine without Docker, follo
 7. Start Celery Worker (In a new terminal):
    ```bash
    cd backend
-   celery -A app.workers.celery_worker.celery_app worker --loglevel=info
+   celery -A app.workers.celery_app worker --loglevel=info
    ```
 
 ### 2. Frontend Setup
