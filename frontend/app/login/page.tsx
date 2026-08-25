@@ -5,7 +5,6 @@ import { authApi } from '@/lib/api/client';
 import { useAuth } from '@/components/AuthContext';
 import { Sparkles, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
-import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -38,11 +37,11 @@ export default function LoginPage() {
       login(token, userData);
 
       toast({ title: 'Welcome back', description: 'You have successfully signed in.', type: 'success' });
-    } catch (err: any) {
-      if (err.message?.includes('401') || err.message?.toLowerCase().includes('credentials')) {
+    } catch (err: unknown) {
+      if (((err as Error).message || "Error")?.includes('401') || ((err as Error).message || "Error")?.toLowerCase().includes('credentials')) {
         toast({ title: 'Invalid credentials', description: 'The email or password you entered is incorrect.', type: 'error' });
       } else {
-        toast({ title: 'Login failed', description: err.message || 'An unexpected error occurred.', type: 'error' });
+        toast({ title: 'Login failed', description: ((err as Error).message || "Error") || 'An unexpected error occurred.', type: 'error' });
       }
     } finally {
       setLoading(false);

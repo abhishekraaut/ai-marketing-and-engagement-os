@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { campaignsApi, contentApi, schedulesApi, socialAccountsApi, trendsApi, Campaign } from '@/lib/api/client';
 import { getErrorMessage } from '@/lib/api/errors';
-import { addDays, formatISO } from 'date-fns';
+import { formatISO } from 'date-fns';
 import { useToast } from '@/components/ui/ToastContext';
 import { Megaphone, Calendar, Clock, CheckCircle, XCircle, Sparkles, Send, Layout, Layers, Loader2, Plus, ArrowRight, Activity, MessageSquare, TrendingUp } from 'lucide-react';
 
@@ -86,7 +86,7 @@ export default function CampaignsPage() {
   });
 
   const actionMutation = useMutation({
-    mutationFn: (data: { action: string, contentId: number, variantId: number, payload?: any }) => {
+    mutationFn: (data: { action: string, contentId: number, variantId: number, payload?: Record<string, unknown> }) => {
       if (data.action === 'submit') return contentApi.submitReview(ORG_ID!, data.contentId, data.variantId);
       if (data.action === 'approve') return contentApi.approve(ORG_ID!, data.contentId, data.variantId);
       if (data.action === 'reject') return contentApi.reject(ORG_ID!, data.contentId, data.variantId, 'Rejected by user');
@@ -94,9 +94,9 @@ export default function CampaignsPage() {
       throw new Error("Invalid action");
     },
     onSuccess: (updatedVariant: { id?: number, status?: string }, variables) => {
-      setGeneratedContent((prev: any) => {
+      setGeneratedContent((prev: { variants: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }[] }) => {
         if (!prev) return prev;
-        const newVariants = prev.variants.map((v: any) => {
+        const newVariants = prev.variants.map((v: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }) => {
           if (variables.action === 'schedule' && v.platform === activeTab) {
              return { ...v, status: 'SCHEDULED' };
           }
@@ -112,8 +112,8 @@ export default function CampaignsPage() {
     onError: (error: Error) => toast({ title: 'Action Failed', description: getErrorMessage(error), type: 'error' })
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleAction = (action: string, variant: any) => {
+   
+  const handleAction = (action: string, variant: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }) => {
     if (action === 'schedule') {
        let dt;
        if (variant.postNow) {
@@ -306,8 +306,8 @@ export default function CampaignsPage() {
                   {/* Sidebar */}
                   <div className="w-full md:w-64 flex flex-col gap-2">
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Generated Variants</h4>
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {generatedContent.variants.map((v: any) => (
+                    { }
+                    {generatedContent.variants.map((v: { platform: string; status: string; id: number; content?: string; text?: string; caption?: string; }) => (
                       <button key={v.platform} onClick={() => setActiveTab(v.platform)} className={`p-4 rounded-xl text-left border transition-all ${activeTab === v.platform ? 'bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-600' : 'bg-white/50 border-slate-200 hover:bg-white hover:border-slate-300'}`}>
                         <div className="flex justify-between items-center mb-2">
                           <div className="font-bold text-slate-800">{v.platform}</div>
@@ -321,8 +321,8 @@ export default function CampaignsPage() {
                   
                   {/* Main Content Area */}
                   <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {generatedContent.variants.map((v: any) => v.platform === activeTab && (
+                    { }
+                    {generatedContent.variants.map((v: { platform: string; status: string; id: number; content?: string; text?: string; caption?: string; }) => v.platform === activeTab && (
                       <div key={v.platform} className="flex flex-col h-full">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                           <div className="flex items-center gap-4">
@@ -373,7 +373,7 @@ export default function CampaignsPage() {
                                 <MessageSquare className="w-4 h-4" /> Post Content
                               </h4>
                               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner font-medium">
-                                contentId: undefined,
+                                {v.content || v.text || 'No content generated yet.'}
                               </div>
                             </div>
                             {v.caption && (

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { Audience,  audiencesApi, API_BASE_URL } from '@/lib/api/client';
-import { Users, Plus, Download, Search, Edit2, Trash2, X } from 'lucide-react';
+import { Audience,  audiencesApi, } from '@/lib/api/client';
+import { Users, Plus, Download, Edit2, Trash2, X } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
 
 export default function AudiencesPage() {
@@ -43,8 +43,8 @@ export default function AudiencesPage() {
     try {
       const { downloadAPI } = await import('@/lib/api/client');
       await downloadAPI(`/organizations/${ORG_ID}/audiences/export`, 'audiences_export.csv');
-    } catch (error: any) {
-      toast({ title: 'Export failed', description: error.message || 'Could not export data.', type: 'error' });
+    } catch (error: unknown) {
+      toast({ title: 'Export failed', description: ((error as Error).message || "Error") || 'Could not export data.', type: 'error' });
     }
   };
 

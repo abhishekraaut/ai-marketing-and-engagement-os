@@ -1,14 +1,14 @@
 'use client';
+import React from 'react';
 
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { PlatformMetric, AnalyticsOverview,  analyticsApi } from '@/lib/api/client';
+import { PlatformMetric, analyticsApi } from '@/lib/api/client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { ChartNoAxesColumn, RefreshCcw, Activity, Users, MousePointerClick, TrendingUp, Filter, Sparkles, Download, X } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
 import { cn } from '@/lib/utils';
-import { API_BASE_URL } from '@/lib/api/client';
 
 export default function AnalyticsPage() {
   const { currentOrgId: ORG_ID } = useAuth();
@@ -69,8 +69,8 @@ export default function AnalyticsPage() {
     try {
       const { downloadAPI } = await import('@/lib/api/client');
       await downloadAPI(`/organizations/${ORG_ID}/analytics/export`, 'analytics_export.csv');
-    } catch (error: any) {
-      toast({ title: 'Export failed', description: error.message || 'Could not export data.', type: 'error' });
+    } catch (error: unknown) {
+      toast({ title: 'Export failed', description: ((error as Error).message || "Error") || 'Could not export data.', type: 'error' });
     }
   };
 
@@ -282,7 +282,7 @@ export default function AnalyticsPage() {
                     <p className="text-slate-500 text-sm">Not enough data to generate insights.</p>
                   </div>
                 ) : (
-                  recommendations.map((rec: any, idx: number) => (
+                  recommendations.map((rec: { insight?: string; title?: string; recommendation?: string; priority?: string; reason?: string; category?: string; }, idx: number) => (
                     <div key={idx} className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                       <div className={cn(
                         "absolute top-0 left-0 w-1 h-full",
@@ -384,8 +384,8 @@ export default function AnalyticsPage() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function KpiCard({ title, value, icon: Icon, trend, positive }: { title: string, value: string | number | undefined, icon: any, trend?: string, positive?: boolean }) {
+ 
+function KpiCard({ title, value, icon: Icon, trend, positive }: { title: string, value: string | number | undefined, icon: React.ElementType, trend?: string, positive?: boolean }) {
   return (
     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 group hover:border-indigo-200 transition-colors">
       <div className="flex justify-between items-start mb-4">

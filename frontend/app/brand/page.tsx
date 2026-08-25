@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { brandApi, BrandProfile } from '@/lib/api/client';
@@ -14,7 +14,7 @@ export default function BrandBrainPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  const { data: brand, isLoading, isError } = useQuery({
+  const { data: brand, isLoading, } = useQuery({
     queryKey: ['brand', ORG_ID],
     queryFn: () => brandApi.getBrandProfile(ORG_ID!),
     enabled: !!ORG_ID,
@@ -70,8 +70,8 @@ export default function BrandBrainPage() {
         setSaveStatus('idle');
       }, 1000);
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (error: any) => {
+     
+    onError: (error: Error) => {
       setSaveStatus('error');
       toast({ title: 'Error', description: error?.message || 'Failed to save brand profile.', type: 'error' });
     }

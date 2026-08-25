@@ -1,15 +1,11 @@
 'use client';
+import React from 'react';
 
 import { useState } from 'react';
+import { EngagementItem, EmailCampaign } from '@/lib/api/client';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { Trend, AnalyticsOverview, PlatformMetric, Campaign,  
-  analyticsApi, 
-  campaignsApi, 
-  emailApi, 
-  engagementApi,
-  API_BASE_URL
-} from '@/lib/api/client';
+import {   analyticsApi, emailApi, engagementApi } from '@/lib/api/client';
 import Link from 'next/link';
 import { 
   Activity, Users, Mail, Inbox as InboxIcon, 
@@ -26,7 +22,7 @@ export default function Dashboard() {
   const [platformFilter, setPlatformFilter] = useState('ALL');
 
   const getDates = () => {
-    if (dateFilter === 'ALL') return {};
+    if (dateFilter === 'ALL') return ;
     const d = new Date();
     d.setDate(d.getDate() - parseInt(dateFilter));
     d.setHours(0, 0, 0, 0);
@@ -63,24 +59,22 @@ export default function Dashboard() {
     return <DashboardSkeleton />;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pendingEngagements = engagements.filter((e: any) => e.reply_status === 'PENDING' || e.reply_status === 'AI_DRAFTED').length;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const activeEmails = emails.filter((e: any) => e.status !== 'SENT').length;
+  const pendingEngagements = engagements.filter((e: { reply_status: string }) => e.reply_status === 'PENDING' || e.reply_status === 'AI_DRAFTED').length;
+  const activeEmails = emails.filter((e: { status: string }) => e.status !== 'SENT').length;
   
   const combinedActivity = [
-    ...engagements.slice(0, 5).map((e: any) => ({
+    ...engagements.slice(0, 5).map((e: EngagementItem) => ({
       id: `eng-${e.id}`,
-      title: `New ${e.sentiment.toLowerCase()} comment from ${e.author_name}`,
-      time: new Date(e.created_at),
+      title: `New ${(e.sentiment || 'NEUTRAL').toLowerCase()} comment from ${e.author_name}`,
+      time: new Date(e.created_at || new Date()),
       type: 'engagement',
       icon: InboxIcon,
       link: '/inbox'
     })),
-    ...emails.slice(0, 5).map((e: any) => ({
+    ...emails.slice(0, 5).map((e: EmailCampaign) => ({
       id: `eml-${e.id}`,
       title: `Email Campaign: ${e.name} (${e.status})`,
-      time: new Date(e.created_at),
+      time: new Date(e.created_at || new Date()),
       type: 'email',
       icon: Mail,
       link: `/email/${e.id}`
@@ -132,8 +126,8 @@ export default function Dashboard() {
               try {
                 const { downloadAPI } = await import('@/lib/api/client');
                 await downloadAPI(`/organizations/${ORG_ID}/analytics/export`, 'dashboard_analytics_export.csv');
-              } catch (error: any) {
-                toast({ title: 'Export failed', description: error.message || 'Could not export data.', type: 'error' });
+              } catch (error: unknown) {
+                toast({ title: 'Export failed', description: ((error as Error).message || "Error") || 'Could not export data.', type: 'error' });
               }
             }}
             className="inline-flex items-center gap-2 bg-white text-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"
@@ -204,8 +198,7 @@ export default function Dashboard() {
                 </div>
               ) : recommendations?.length > 0 ? (
                 <div className="space-y-4">
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  {recommendations.map((rec: any, idx: number) => (
+                  {recommendations.map((rec: { insight?: string; title?: string; recommendation?: string; priority?: string; reason?: string; category?: string; }, idx: number) => (
                     <div key={idx} className="group bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100 p-5 rounded-xl hover:shadow-md transition-all duration-300">
                       <div className="flex items-start justify-between">
                         <div>
@@ -297,8 +290,7 @@ export default function Dashboard() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function MetricCard({ label, value, icon: Icon, alert = false }: { label: string, value: string | number | null, icon: any, alert?: boolean }) {
+function MetricCard({ label, value, icon: Icon, alert = false }: { label: string, value: string | number | null, icon: React.ElementType, alert?: boolean }) {
   return (
     <div className={cn(
       "bg-white rounded-xl p-6 border shadow-sm transition-all duration-300 hover:shadow-md",

@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
 import { Lead,  leadsApi } from '@/lib/api/client';
-import { UserPlus, Plus, Edit2, Trash2, X, MoreVertical } from 'lucide-react';
+import { UserPlus, Plus, X, } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
-import { cn } from '@/lib/utils';
 
 const COLUMNS = ['NEW', 'CONTACTED', 'QUALIFIED', 'UNQUALIFIED', 'CONVERTED', 'LOST'];
 const SOURCES = ['SOCIAL', 'EMAIL', 'WEBSITE', 'REFERRAL', 'OTHER'];

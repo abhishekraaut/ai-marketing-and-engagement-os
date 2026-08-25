@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Search, Command, X, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from './ToastContext';
 

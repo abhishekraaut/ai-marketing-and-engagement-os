@@ -7,7 +7,6 @@ import { EmailCampaign, Audience, Campaign,  emailApi, campaignsApi, audiencesAp
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Plus, Users, LayoutTemplate, Clock, Send, Sparkles, X, ChevronRight, CheckCircle2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastContext';
 
 export default function EmailPage() {

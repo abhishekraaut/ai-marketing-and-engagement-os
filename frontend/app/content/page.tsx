@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ContentItem,  socialAccountsApi, contentApi } from '@/lib/api/client';
+import { socialAccountsApi, contentApi } from '@/lib/api/client';
 import { Send, Image as ImageIcon, Video, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
 import { cn } from '@/lib/utils';
@@ -27,10 +27,10 @@ export default function ContentPage() {
   });
 
   const publishMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: (data: any) => contentApi.publishContent(ORG_ID!, data),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSuccess: (res: any) => {
+     
+    mutationFn: (data: Record<string, unknown>) => contentApi.publishContent(ORG_ID!, data),
+     
+    onSuccess: (res: { published_count?: number }) => {
       toast({ title: 'Success', description: `Successfully published ${res.published_count} posts.`, type: 'success' });
       router.push('/analytics');
     }
@@ -44,8 +44,8 @@ export default function ContentPage() {
     
     // get platforms from selected accounts
     const platforms = Array.from(new Set(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      accounts?.filter((a: any) => selectedAccounts.includes(a.id)).map((a: any) => a.platform) || []
+     
+      accounts?.filter((a: { id: number; platform: string }) => selectedAccounts.includes(a.id)).map((a: { id: number; platform: string }) => a.platform) || []
     ));
 
     publishMutation.mutate({
@@ -144,7 +144,7 @@ export default function ContentPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {accounts.map((acc: any) => {
+              {accounts.map((acc: { id: number; platform: string; username: string; account_name?: string }) => {
                 const isSelected = selectedAccounts.includes(acc.id);
                 return (
                   <div 

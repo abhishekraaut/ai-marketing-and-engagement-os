@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { EngagementItem } from '@/lib/api/client';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { engagementApi } from '@/lib/api/client';
-import { MessageSquareText, Search, Filter, RefreshCcw, Sparkles, Send, CheckCircle2, User, Clock, AlertCircle, Edit3, X } from 'lucide-react';
+import { MessageSquareText, Filter, RefreshCcw, Sparkles, Send, CheckCircle2, Clock, AlertCircle, Edit3, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastContext';
 
@@ -147,8 +148,7 @@ export default function InboxPage() {
                 <p className="text-xs text-slate-500 mt-1">No engagements match your current filters.</p>
               </div>
             ) : (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              engagements.map((item: any) => (
+              engagements.map((item: EngagementItem) => (
                 <div 
                   key={item.id} 
                   onClick={() => {
@@ -181,7 +181,7 @@ export default function InboxPage() {
                     {item.content}
                   </p>
                   <div className="flex flex-wrap gap-2 items-center">
-                    <SentimentBadge sentiment={item.sentiment} />
+                    <SentimentBadge sentiment={item.sentiment || 'NEUTRAL'} />
                     {item.reply_status === 'REPLIED' && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Sent</span>}
                     {item.reply_status === 'APPROVED' && <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">Approved</span>}
                     {item.reply_status === 'AI_DRAFTED' && <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><Sparkles className="w-3 h-3"/> Draft</span>}

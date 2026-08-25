@@ -2,18 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthContext';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EmailCampaign,  emailApi } from '@/lib/api/client';
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, Send, Clock, Edit3, X, CheckCircle2, ChevronRight, BarChart3, LayoutTemplate, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ArrowLeft, Sparkles, Send, Clock, Edit3, X, CheckCircle2, BarChart3, LayoutTemplate, Users } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
 
 export default function EmailDetail() {
   const { currentOrgId: ORG_ID } = useAuth();
   const { id } = useParams();
-  const router = useRouter();
+  // const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const emailId = Number(id);

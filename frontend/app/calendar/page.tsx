@@ -3,20 +3,20 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { Schedule,  schedulesApi } from '@/lib/api/client';
+import { schedulesApi } from '@/lib/api/client';
 import { 
   format, parseISO, isToday, isSameMonth, 
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, 
   eachDayOfInterval, addMonths, subMonths, isSameDay
 } from 'date-fns';
-import { Calendar as CalendarIcon, Clock, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function CalendarPage() {
   const { currentOrgId: ORG_ID } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   
-  const { data: events, isLoading } = useQuery({
+  const { data: events, } = useQuery({
     queryKey: ['calendar', ORG_ID],
     queryFn: () => schedulesApi.getCalendarEvents(ORG_ID!),
     enabled: !!ORG_ID
@@ -36,7 +36,7 @@ export default function CalendarPage() {
 
   const getEventsForDay = (day: Date) => {
     if (!events) return [];
-    return events.filter((e: any) => isSameDay(parseISO(e.scheduled_at as string), day));
+    return events.filter((e: { scheduled_at?: string }) => isSameDay(parseISO(e.scheduled_at as string), day));
   };
 
   return (

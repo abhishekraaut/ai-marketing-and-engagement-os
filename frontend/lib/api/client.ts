@@ -21,7 +21,7 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     try {
       const errorData = await response.json();
       errorMessage = errorData.detail || errorMessage;
-    } catch (e) {
+    } catch {
       errorMessage = response.statusText;
     }
     throw new Error(errorMessage);
@@ -49,7 +49,7 @@ export async function downloadAPI(endpoint: string, filename: string) {
     try {
       const errorData = await response.json();
       errorMessage = errorData.detail || errorMessage;
-    } catch (e) {
+    } catch {
       errorMessage = response.statusText;
     }
     throw new Error(errorMessage);
@@ -82,7 +82,7 @@ export const authApi = {
         try {
           const errorData = await response.json();
           errorMessage = errorData.detail || errorMessage;
-        } catch (e) {
+        } catch {
           errorMessage = response.statusText;
         }
         throw new Error(errorMessage);
@@ -173,6 +173,8 @@ export interface Campaign {
   tone?: string;
   cta?: string;
   status: string;
+  reply_status?: string;
+  ai_draft_response?: string;
   start_date?: string;
   end_date?: string;
   created_at: string;
@@ -266,6 +268,8 @@ export interface EngagementItem {
   content: string;
   sentiment?: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
   status: string;
+  reply_status?: string;
+  ai_draft_response?: string;
   created_at: string;
   ai_draft_reply?: string;
 }
@@ -277,10 +281,13 @@ export interface EmailCampaign {
   recipient_count?: number;
   subject?: string;
   status: string;
+  reply_status?: string;
+  ai_draft_response?: string;
   audience_id?: number;
   campaign_id?: number;
   body_html?: string;
   scheduled_at?: string;
+  created_at?: string;
 }
 
 export interface Trend {
@@ -308,6 +315,8 @@ export interface Lead {
   name: string;
   email: string;
   status: string;
+  reply_status?: string;
+  ai_draft_response?: string;
   score?: number;
   phone?: string;
   source?: string;
