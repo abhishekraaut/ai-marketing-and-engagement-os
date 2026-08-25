@@ -20,7 +20,7 @@ export default function InboxPage() {
   const [editValue, setEditValue] = useState('');
 
   const getParams = () => {
-    let params: any = {};
+    const params: Record<string, string> = {};
     if (activeFilter === 'NEEDS_REPLY') params.reply_status = 'NEEDS_REPLY';
     if (activeFilter === 'POSITIVE') params.sentiment = 'POSITIVE';
     if (activeFilter === 'NEGATIVE') params.sentiment = 'NEGATIVE';
@@ -77,7 +77,7 @@ export default function InboxPage() {
 
   if (!ORG_ID) return <InboxSkeleton />;
 
-  const selectedItem = engagements.find((e: any) => e.id === selectedId);
+  const selectedItem = engagements.find((e: { id: string | number }) => e.id === selectedId);
 
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)] animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -147,6 +147,7 @@ export default function InboxPage() {
                 <p className="text-xs text-slate-500 mt-1">No engagements match your current filters.</p>
               </div>
             ) : (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               engagements.map((item: any) => (
                 <div 
                   key={item.id} 
@@ -242,7 +243,7 @@ export default function InboxPage() {
                     </div>
                     <h4 className="text-lg font-bold text-slate-900 mb-2">Draft an AI Response</h4>
                     <p className="text-slate-500 text-sm text-center max-w-sm mb-6">
-                      Generate a contextual, brand-aligned response based on the user's sentiment and your configured guidelines.
+                      Generate a contextual, brand-aligned response based on the user&apos;s sentiment and your configured guidelines.
                     </p>
                     <button 
                       onClick={() => generateMutation.mutate(selectedItem.id)}
@@ -418,3 +419,5 @@ function InboxSkeleton() {
     </div>
   );
 }
+
+

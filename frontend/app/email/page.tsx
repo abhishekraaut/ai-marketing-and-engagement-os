@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { emailApi, campaignsApi, audiencesApi } from '@/lib/api/client';
+import { EmailCampaign, Audience, Campaign,  emailApi, campaignsApi, audiencesApi } from '@/lib/api/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Plus, Users, LayoutTemplate, Clock, Send, Sparkles, X, ChevronRight, CheckCircle2 } from 'lucide-react';
@@ -38,7 +38,7 @@ export default function EmailPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => emailApi.createEmail(ORG_ID!, data),
+    mutationFn: (data: Partial<EmailCampaign>) => emailApi.createEmail(ORG_ID!, data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['emails'] });
       setShowModal(false);
@@ -116,7 +116,7 @@ export default function EmailPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-100">
-                {emails.map((email: any) => (
+                {emails.map((email: EmailCampaign) => (
                   <tr key={email.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
@@ -206,7 +206,7 @@ export default function EmailPage() {
                   onChange={(e) => setFormData({...formData, audience_id: Number(e.target.value)})}
                 >
                   <option value="" disabled>Select an audience</option>
-                  {audiences?.map((a: any) => (
+                  {audiences?.map((a: Audience) => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
                 </select>
@@ -222,7 +222,7 @@ export default function EmailPage() {
                   onChange={(e) => setFormData({...formData, campaign_id: e.target.value})}
                 >
                   <option value="">-- No Parent Campaign --</option>
-                  {campaigns.map((c: any) => (
+                  {campaigns.map((c: Campaign) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
@@ -242,8 +242,8 @@ export default function EmailPage() {
               <button 
                 onClick={() => createMutation.mutate({
                   name: formData.name,
-                  audience_id: formData.audience_id,
-                  campaign_id: formData.campaign_id ? Number(formData.campaign_id) : null
+                  audience_id: formData.audience_id || undefined,
+                  campaign_id: formData.campaign_id ? Number(formData.campaign_id) : undefined
                 })}
                 disabled={!formData.name || !formData.audience_id || createMutation.isPending}
                 className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 shadow-sm shadow-indigo-200 transition-all"
@@ -306,3 +306,5 @@ function EmailSkeleton() {
     </div>
   );
 }
+
+

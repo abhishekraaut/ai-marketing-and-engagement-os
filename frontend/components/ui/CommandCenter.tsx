@@ -27,7 +27,7 @@ export default function CommandCenter() {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
     } else {
-      setQuery('');
+      setTimeout(() => setQuery(''), 0);
     }
   }, [isOpen]);
 

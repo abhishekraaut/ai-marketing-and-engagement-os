@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { trendsApi } from '@/lib/api/client';
+import { Trend,  trendsApi } from '@/lib/api/client';
 import Link from 'next/link';
 import { TrendingUp, Sparkles, AlertTriangle, ArrowRight, Zap, Target, ShieldAlert, Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,7 @@ export default function TrendsPage() {
 
   const fetchLiveMutation = useMutation({
     mutationFn: () => trendsApi.fetchLiveTrends(ORG_ID!),
-    onSuccess: (newTrends: any) => {
+    onSuccess: (newTrends: Trend[]) => {
       queryClient.invalidateQueries({ queryKey: ['trends', ORG_ID] });
       toast({ title: 'Trends Fetched', description: `Successfully discovered ${newTrends.length} new trends via AI.`, type: 'success' });
     },
@@ -42,7 +42,7 @@ export default function TrendsPage() {
   });
 
   const createTrendMutation = useMutation({
-    mutationFn: (data: any) => trendsApi.createTrend(ORG_ID!, data),
+    mutationFn: (data: Partial<Trend>) => trendsApi.createTrend(ORG_ID!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trends', ORG_ID] });
       toast({ title: 'Trend Added', description: 'Successfully added custom trend.', type: 'success' });
@@ -100,7 +100,7 @@ export default function TrendsPage() {
                 <p className="text-slate-500 text-sm">No active trends found in your industry right now.</p>
               </div>
             ) : (
-              trends.map((trend: any) => (
+              trends.map((trend: Trend) => (
                 <button
                   key={trend.id}
                   onClick={() => {
@@ -174,7 +174,7 @@ export default function TrendsPage() {
                     <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5" />
                     <div>
                       <h3 className="font-bold mb-1">Analysis Failed</h3>
-                      <p className="text-sm">We couldn't evaluate this trend. Please ensure your Brand Brain is fully configured before running analyses.</p>
+                      <p className="text-sm">We couldn&apos;t evaluate this trend. Please ensure your Brand Brain is fully configured before running analyses.</p>
                       <Link href="/brand" className="inline-flex items-center gap-2 mt-4 text-sm font-bold text-red-800 hover:underline">
                         Configure Brand Brain <ArrowRight className="w-4 h-4" />
                       </Link>
@@ -255,7 +255,7 @@ export default function TrendsPage() {
                 <div className="p-6 bg-slate-50 border-t border-slate-100 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">
                   <p className="text-sm text-slate-500 font-medium">Ready to capitalize on this trend?</p>
                   <Link 
-                    href={`/campaigns?topic=${encodeURIComponent(trends.find((t:any) => t.id === selectedTrend)?.title || '')}`}
+                    href={`/campaigns?topic=${encodeURIComponent(trends.find((t: { id: number; title: string }) => t.id === selectedTrend)?.title || '')}`}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300"
                   >
                     Start AI Campaign <ArrowRight className="w-4 h-4" />
@@ -368,3 +368,5 @@ function TrendsSkeleton() {
     </div>
   );
 }
+
+

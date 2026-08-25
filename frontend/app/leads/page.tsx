@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { leadsApi } from '@/lib/api/client';
+import { Lead,  leadsApi } from '@/lib/api/client';
 import { UserPlus, Plus, Edit2, Trash2, X, MoreVertical } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
 import { cn } from '@/lib/utils';
@@ -27,7 +27,7 @@ export default function LeadsPage() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: (data: any) => editingId ? leadsApi.updateLead(ORG_ID!, editingId, data) : leadsApi.createLead(ORG_ID!, data),
+    mutationFn: (data: Partial<Lead>) => editingId ? leadsApi.updateLead(ORG_ID!, editingId, data) : leadsApi.createLead(ORG_ID!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads', ORG_ID] });
       toast({ title: 'Success', description: `Lead ${editingId ? 'updated' : 'created'}.`, type: 'success' });
@@ -57,9 +57,9 @@ export default function LeadsPage() {
     setIsModalOpen(true);
   };
 
-  const openEdit = (lead: any) => {
+  const openEdit = (lead: Lead) => {
     setEditingId(lead.id);
-    setFormData({ name: lead.name, email: lead.email || '', phone: lead.phone || '', source: lead.source, status: lead.status, notes: lead.notes || '' });
+    setFormData({ name: lead.name, email: lead.email || '', phone: lead.phone || '', source: lead.source || 'SOCIAL', status: lead.status || 'NEW', notes: lead.notes || '' });
     setIsModalOpen(true);
   };
 
@@ -87,7 +87,7 @@ export default function LeadsPage() {
 
       <div className="flex gap-6 overflow-x-auto pb-4 flex-1 items-start scrollbar-hide">
         {COLUMNS.map((col) => {
-          const colLeads = (leads || []).filter((l: any) => l.status === col);
+          const colLeads = (leads || []).filter((l: Lead) => l.status === col);
           
           return (
             <div key={col} className="bg-slate-100 rounded-xl min-w-[300px] w-[300px] flex flex-col max-h-full border border-slate-200/50 shadow-sm shrink-0">
@@ -99,7 +99,7 @@ export default function LeadsPage() {
               </div>
               
               <div className="p-3 space-y-3 overflow-y-auto flex-1 custom-scrollbar">
-                {colLeads.map((lead: any) => (
+                {colLeads.map((lead: Lead) => (
                   <div 
                     key={lead.id} 
                     onClick={() => openEdit(lead)}
@@ -243,3 +243,5 @@ export default function LeadsPage() {
     </div>
   );
 }
+
+

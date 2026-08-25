@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { analyticsApi } from '@/lib/api/client';
+import { PlatformMetric, AnalyticsOverview,  analyticsApi } from '@/lib/api/client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { ChartNoAxesColumn, RefreshCcw, Activity, Users, MousePointerClick, TrendingUp, Filter, Sparkles, Download, X } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
@@ -27,7 +27,7 @@ export default function AnalyticsPage() {
     return { start_date: d.toISOString() };
   };
 
-  const queryParams = { ...getDates(), ...(platformFilter !== 'ALL' ? { platform: platformFilter } : {}) };
+  const queryParams = { ...getDates(), ...(platformFilter !== 'ALL' ? { platform: platformFilter } : {}) } as Record<string, string>;
 
   const { data: overview, isLoading: isOverviewLoading } = useQuery({
     queryKey: ['analytics-overview', ORG_ID, queryParams],
@@ -76,7 +76,7 @@ export default function AnalyticsPage() {
 
   const syncMutation = useMutation({
     mutationFn: () => analyticsApi.syncAnalytics(ORG_ID!),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Record<string, unknown>) => {
       queryClient.invalidateQueries({ queryKey: ['analytics-overview'] });
       queryClient.invalidateQueries({ queryKey: ['analytics-trends'] });
       queryClient.invalidateQueries({ queryKey: ['analytics-platforms'] });
@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
             <ChartNoAxesColumn className="w-8 h-8 text-slate-300" />
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-2">No data available</h3>
-          <p className="text-slate-500 mb-8 max-w-md">You haven't published any posts yet. Publish content and sync analytics to start building your dashboard.</p>
+          <p className="text-slate-500 mb-8 max-w-md">You haven&apos;t published any posts yet. Publish content and sync analytics to start building your dashboard.</p>
           <button 
             onClick={() => syncMutation.mutate()} 
             disabled={syncMutation.isPending}
@@ -245,8 +245,8 @@ export default function AnalyticsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {topContent?.map((item: any, i: number) => (
-                      <tr key={i} onClick={() => setSelectedPostId(item.published_post_id)} className="hover:bg-slate-50/50 transition-colors cursor-pointer">
+                    {topContent?.map((item: PlatformMetric, i: number) => (
+                      <tr key={i} onClick={() => setSelectedPostId(item.published_post_id || null)} className="hover:bg-slate-50/50 transition-colors cursor-pointer">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700">{item.platform}</td>
                         <td className="px-6 py-4 text-sm">
                           <div className="font-semibold text-slate-900 mb-1 line-clamp-1">{item.title}</div>
@@ -282,8 +282,8 @@ export default function AnalyticsPage() {
                     <p className="text-slate-500 text-sm">Not enough data to generate insights.</p>
                   </div>
                 ) : (
-                  recommendations.map((rec: any, i: number) => (
-                    <div key={i} className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                  recommendations.map((rec: any, idx: number) => (
+                    <div key={idx} className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                       <div className={cn(
                         "absolute top-0 left-0 w-1 h-full",
                         rec.priority === 'HIGH' ? "bg-amber-400" : "bg-indigo-400"
@@ -316,7 +316,7 @@ export default function AnalyticsPage() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-slate-900">Post Performance</h2>
-              <button onClick={() => setSelectedPostId(null)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
+              <button onClick={() => setSelectedPostId(null)} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -384,6 +384,7 @@ export default function AnalyticsPage() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function KpiCard({ title, value, icon: Icon, trend, positive }: { title: string, value: string | number | undefined, icon: any, trend?: string, positive?: boolean }) {
   return (
     <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 group hover:border-indigo-200 transition-colors">
@@ -423,3 +424,5 @@ function AnalyticsSkeleton() {
     </div>
   );
 }
+
+

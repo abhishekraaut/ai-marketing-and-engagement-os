@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { audiencesApi, API_BASE_URL } from '@/lib/api/client';
+import { Audience,  audiencesApi, API_BASE_URL } from '@/lib/api/client';
 import { Users, Plus, Download, Search, Edit2, Trash2, X } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastContext';
 
@@ -23,7 +23,7 @@ export default function AudiencesPage() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: (data: any) => editingId ? audiencesApi.updateAudience(ORG_ID!, editingId, data) : audiencesApi.createAudience(ORG_ID!, data),
+    mutationFn: (data: Partial<Audience>) => editingId ? audiencesApi.updateAudience(ORG_ID!, editingId, data) : audiencesApi.createAudience(ORG_ID!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['audiences', ORG_ID] });
       toast({ title: 'Success', description: `Audience ${editingId ? 'updated' : 'created'} successfully.`, type: 'success' });
@@ -54,7 +54,7 @@ export default function AudiencesPage() {
     setIsModalOpen(true);
   };
 
-  const openEdit = (aud: any) => {
+  const openEdit = (aud: Audience) => {
     setEditingId(aud.id);
     setFormData({ name: aud.name, description: aud.description || '' });
     setIsModalOpen(true);
@@ -107,7 +107,7 @@ export default function AudiencesPage() {
               <tr>
                 <td colSpan={4} className="px-6 py-12 text-center text-slate-500">No audiences found.</td>
               </tr>
-            ) : audiences.map((aud: any) => (
+            ) : audiences.map((aud: Audience) => (
               <tr key={aud.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{aud.name}</td>
                 <td className="px-6 py-4 text-sm text-slate-600">{aud.description || '-'}</td>
@@ -174,3 +174,5 @@ export default function AudiencesPage() {
     </div>
   );
 }
+
+

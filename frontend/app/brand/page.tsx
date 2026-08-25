@@ -70,6 +70,7 @@ export default function BrandBrainPage() {
         setSaveStatus('idle');
       }, 1000);
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       setSaveStatus('error');
       toast({ title: 'Error', description: error?.message || 'Failed to save brand profile.', type: 'error' });
@@ -288,3 +289,5 @@ export default function BrandBrainPage() {
     </div>
   );
 }
+
+

@@ -8,7 +8,7 @@ interface User {
   id: number;
   email: string;
   name: string;
-  organizations: any[];
+  organizations: { id: number; name: string }[];
 }
 
 interface AuthContextType {

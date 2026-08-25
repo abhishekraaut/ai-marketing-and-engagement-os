@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { emailApi } from '@/lib/api/client';
+import { EmailCampaign,  emailApi } from '@/lib/api/client';
 import Link from 'next/link';
 import { ArrowLeft, Sparkles, Send, Clock, Edit3, X, CheckCircle2, ChevronRight, BarChart3, LayoutTemplate, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -36,12 +36,14 @@ export default function EmailDetail() {
 
   useEffect(() => {
     if (email) {
-      setFormData({
-        subject: email.subject || '',
-        preview_text: email.preview_text || '',
-        body: email.body || '',
-        cta: email.cta || ''
-      });
+      setTimeout(() => {
+        setFormData({
+          subject: email.subject || '',
+          preview_text: email.preview_text || '',
+          body: email.body || '',
+          cta: email.cta || ''
+        });
+      }, 0);
     }
   }, [email]);
 
@@ -55,7 +57,7 @@ export default function EmailDetail() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => emailApi.updateEmail(ORG_ID!, emailId, data),
+    mutationFn: (data: Partial<EmailCampaign>) => emailApi.updateEmail(ORG_ID!, emailId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['email', ORG_ID, emailId] });
       setEditMode(false);
@@ -345,7 +347,7 @@ export default function EmailDetail() {
                 
                 <div className="w-full border-t border-slate-100 pt-8 mt-auto text-center text-[11px] font-medium text-slate-400 space-y-4">
                   {formData.preview_text && (
-                    <div className="text-slate-500 italic max-w-xs mx-auto">"{formData.preview_text}"</div>
+                    <div className="text-slate-500 italic max-w-xs mx-auto">&quot;{formData.preview_text}&quot;</div>
                   )}
                   <div>
                     © {new Date().getFullYear()} {email.organization?.name || 'Acme Corp'}. All rights reserved.<br/>

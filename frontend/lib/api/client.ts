@@ -196,6 +196,16 @@ export const campaignsApi = {
       body: JSON.stringify({ platforms, format: format || "Standard Post" }),
     }),
 };
+export interface ContentItem {
+  id: number;
+  [key: string]: unknown;
+}
+
+export interface Schedule {
+  id: number;
+  [key: string]: unknown;
+}
+
 export const contentApi = {
   submitReview: (orgId: number, contentId: number, variantId: number) =>
     fetchAPI(`/organizations/${orgId}/content/${contentId}/variants/${variantId}/submit-review`, { method: 'POST' }),
@@ -206,12 +216,12 @@ export const contentApi = {
       method: 'POST',
       body: JSON.stringify({ reason }),
     }),
-  editVariant: (orgId: number, contentId: number, variantId: number, data: any) =>
+  editVariant: (orgId: number, contentId: number, variantId: number, data: Record<string, unknown>) =>
     fetchAPI(`/organizations/${orgId}/content/${contentId}/variants/${variantId}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
-  publishContent: (orgId: number, data: any) =>
+  publishContent: (orgId: number, data: Record<string, unknown>) =>
     fetchAPI(`/organizations/${orgId}/content/publish`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -219,7 +229,7 @@ export const contentApi = {
 };
 
 export const schedulesApi = {
-  scheduleVariant: (orgId: number, variantId: number, data: any) =>
+  scheduleVariant: (orgId: number, variantId: number, data: Record<string, unknown>) =>
     fetchAPI(`/organizations/${orgId}/content/variants/${variantId}/schedule`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -228,15 +238,15 @@ export const schedulesApi = {
 };
 
 export const analyticsApi = {
-  getOverview: (orgId: number, params?: any) => {
+  getOverview: (orgId: number, params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchAPI(`/organizations/${orgId}/analytics/overview${qs}`);
   },
-  getTrends: (orgId: number, params?: any) => {
+  getTrends: (orgId: number, params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchAPI(`/organizations/${orgId}/analytics/trends${qs}`);
   },
-  getPlatforms: (orgId: number, params?: any) => {
+  getPlatforms: (orgId: number, params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchAPI(`/organizations/${orgId}/analytics/platforms${qs}`);
   },
@@ -247,8 +257,87 @@ export const analyticsApi = {
   syncAnalytics: (orgId: number) => fetchAPI(`/organizations/${orgId}/analytics/sync`, { method: 'POST' })
 };
 
+export interface EngagementItem {
+  id: number;
+  platform: string;
+  author_name: string;
+  author_handle: string;
+  author_avatar?: string;
+  content: string;
+  sentiment?: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  status: string;
+  created_at: string;
+  ai_draft_reply?: string;
+}
+
+export interface EmailCampaign {
+  id: number;
+  name: string;
+  audience_name?: string;
+  recipient_count?: number;
+  subject?: string;
+  status: string;
+  audience_id?: number;
+  campaign_id?: number;
+  body_html?: string;
+  scheduled_at?: string;
+}
+
+export interface Trend {
+  id: number;
+  topic: string;
+  volume: number;
+  momentum: number;
+  source: string;
+  category: string;
+  relevance_score?: number;
+  ai_analysis?: string;
+  title?: string;
+  description?: string;
+}
+
+export interface Audience {
+  id: number;
+  name: string;
+  description?: string;
+  contact_count?: number;
+}
+
+export interface Lead {
+  id: number;
+  name: string;
+  email: string;
+  status: string;
+  score?: number;
+  phone?: string;
+  source?: string;
+  notes?: string;
+}
+
+export interface PlatformMetric {
+  platform: string;
+  impressions: number;
+  engagements: number;
+  clicks: number;
+  conversion_rate?: number;
+  published_post_id?: number;
+  title?: string;
+  content_preview?: string;
+  engagement_rate?: number;
+}
+
+export interface AnalyticsOverview {
+  total_impressions: number;
+  total_engagements: number;
+  total_clicks: number;
+  engagement_rate: number;
+  impressions_growth: number;
+  engagements_growth: number;
+  clicks_growth: number;
+}
+
 export const engagementApi = {
-  getEngagements: (orgId: number, params?: any) => {
+  getEngagements: (orgId: number, params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
     return fetchAPI(`/organizations/${orgId}/engagements${qs}`);
   },
@@ -265,12 +354,12 @@ export const engagementApi = {
 export const emailApi = {
   getEmails: (orgId: number) => fetchAPI(`/organizations/${orgId}/email-campaigns`),
   getEmail: (orgId: number, emailId: number) => fetchAPI(`/organizations/${orgId}/email-campaigns/${emailId}`),
-  createEmail: (orgId: number, data: any) => fetchAPI(`/organizations/${orgId}/email-campaigns`, {
+  createEmail: (orgId: number, data: Partial<EmailCampaign>) => fetchAPI(`/organizations/${orgId}/email-campaigns`, {
     method: 'POST',
     body: JSON.stringify(data)
   }),
   generateEmail: (orgId: number, emailId: number) => fetchAPI(`/organizations/${orgId}/email-campaigns/${emailId}/generate`, { method: 'POST' }),
-  updateEmail: (orgId: number, emailId: number, data: any) => fetchAPI(`/organizations/${orgId}/email-campaigns/${emailId}`, {
+  updateEmail: (orgId: number, emailId: number, data: Partial<EmailCampaign>) => fetchAPI(`/organizations/${orgId}/email-campaigns/${emailId}`, {
     method: 'PATCH',
     body: JSON.stringify(data)
   }),
@@ -289,7 +378,7 @@ export const emailApi = {
 export const trendsApi = {
   getTrends: (orgId: number) => fetchAPI(`/organizations/${orgId}/trends`),
   evaluateTrend: (orgId: number, trendId: number) => fetchAPI(`/organizations/${orgId}/trends/${trendId}/evaluate`, { method: 'POST' }),
-  createTrend: (orgId: number, data: any) => fetchAPI(`/organizations/${orgId}/trends`, { method: 'POST', body: JSON.stringify(data) }),
+  createTrend: (orgId: number, data: Partial<Trend>) => fetchAPI(`/organizations/${orgId}/trends`, { method: 'POST', body: JSON.stringify(data) }),
   fetchLiveTrends: (orgId: number) => fetchAPI(`/organizations/${orgId}/trends/fetch`, { method: 'POST' }),
 };
 
@@ -298,8 +387,8 @@ export const trendsApi = {
 // ------------------------------------------------------------------
 export const audiencesApi = {
   getAudiences: (orgId: number) => fetchAPI(`/organizations/${orgId}/audiences`),
-  createAudience: (orgId: number, data: any) => fetchAPI(`/organizations/${orgId}/audiences`, { method: 'POST', body: JSON.stringify(data) }),
-  updateAudience: (orgId: number, id: number, data: any) => fetchAPI(`/organizations/${orgId}/audiences/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  createAudience: (orgId: number, data: Partial<Audience>) => fetchAPI(`/organizations/${orgId}/audiences`, { method: 'POST', body: JSON.stringify(data) }),
+  updateAudience: (orgId: number, id: number, data: Partial<Audience>) => fetchAPI(`/organizations/${orgId}/audiences/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAudience: (orgId: number, id: number) => fetchAPI(`/organizations/${orgId}/audiences/${id}`, { method: 'DELETE' }),
   exportAudiences: (orgId: number) => fetchAPI(`/organizations/${orgId}/audiences/export`)
 };
@@ -309,8 +398,8 @@ export const audiencesApi = {
 // ------------------------------------------------------------------
 export const leadsApi = {
   getLeads: (orgId: number) => fetchAPI(`/organizations/${orgId}/leads`),
-  createLead: (orgId: number, data: any) => fetchAPI(`/organizations/${orgId}/leads`, { method: 'POST', body: JSON.stringify(data) }),
-  updateLead: (orgId: number, id: number, data: any) => fetchAPI(`/organizations/${orgId}/leads/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  createLead: (orgId: number, data: Partial<Lead>) => fetchAPI(`/organizations/${orgId}/leads`, { method: 'POST', body: JSON.stringify(data) }),
+  updateLead: (orgId: number, id: number, data: Partial<Lead>) => fetchAPI(`/organizations/${orgId}/leads/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteLead: (orgId: number, id: number) => fetchAPI(`/organizations/${orgId}/leads/${id}`, { method: 'DELETE' })
 };
 

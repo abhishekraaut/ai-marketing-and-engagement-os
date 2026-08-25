@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { schedulesApi } from '@/lib/api/client';
+import { Schedule,  schedulesApi } from '@/lib/api/client';
 import { 
   format, parseISO, isToday, isSameMonth, 
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, 
@@ -36,7 +36,7 @@ export default function CalendarPage() {
 
   const getEventsForDay = (day: Date) => {
     if (!events) return [];
-    return events.filter((e: any) => isSameDay(parseISO(e.scheduled_at), day));
+    return events.filter((e: any) => isSameDay(parseISO(e.scheduled_at as string), day));
   };
 
   return (
@@ -103,7 +103,7 @@ export default function CalendarPage() {
                 </div>
                 
                 <div className="space-y-1.5 overflow-y-auto max-h-[100px] scrollbar-hide">
-                  {dayEvents.map((evt: any) => (
+                  {dayEvents.map((evt: { id?: string | number, schedule_id?: string | number, date?: Date | string, platform?: string, content?: string, status?: string, time?: string, [key: string]: unknown }) => (
                     <div 
                       key={evt.schedule_id} 
                       className={cn(
@@ -112,11 +112,10 @@ export default function CalendarPage() {
                         evt.status === 'FAILED' ? "bg-red-50 border-red-100 text-red-800" :
                         "bg-white border-slate-200 text-slate-700 hover:border-indigo-200"
                       )}
-                      title={evt.content}
+                      title={evt.content as string}
                     >
                       <div className="flex items-center gap-1 font-semibold mb-0.5 opacity-80">
-                        {evt.status === 'PUBLISHED' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                        {format(parseISO(evt.scheduled_at), 'HH:mm')}
+                        <Clock className="w-3.5 h-3.5 mr-1" /> {format(parseISO(evt.scheduled_at as string), 'HH:mm')}
                       </div>
                       <div className="truncate">{evt.content}</div>
                     </div>
@@ -149,3 +148,5 @@ function CalendarSkeleton() {
     </div>
   );
 }
+
+

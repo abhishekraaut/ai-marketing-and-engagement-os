@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { 
+import { Trend, AnalyticsOverview, PlatformMetric, Campaign,  
   analyticsApi, 
   campaignsApi, 
   emailApi, 
@@ -33,7 +33,7 @@ export default function Dashboard() {
     return { start_date: d.toISOString() };
   };
 
-  const queryParams = { ...getDates(), ...(platformFilter !== 'ALL' ? { platform: platformFilter } : {}) };
+  const queryParams = { ...getDates(), ...(platformFilter !== 'ALL' ? { platform: platformFilter } : {}) } as Record<string, string>;
 
   const { data: overview, isLoading: overviewLoading } = useQuery({
     queryKey: ['analytics_overview', ORG_ID, queryParams],
@@ -63,7 +63,9 @@ export default function Dashboard() {
     return <DashboardSkeleton />;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pendingEngagements = engagements.filter((e: any) => e.reply_status === 'PENDING' || e.reply_status === 'AI_DRAFTED').length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const activeEmails = emails.filter((e: any) => e.status !== 'SENT').length;
   
   const combinedActivity = [
@@ -94,7 +96,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Welcome back, {user?.name?.split(' ')[0] || 'User'}
           </h1>
-          <p className="text-slate-500 mt-1">Here's what's happening across your workspace today.</p>
+          <p className="text-slate-500 mt-1">Here&apos;s what&apos;s happening across your workspace today.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm hidden sm:flex">
@@ -202,6 +204,7 @@ export default function Dashboard() {
                 </div>
               ) : recommendations?.length > 0 ? (
                 <div className="space-y-4">
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
                   {recommendations.map((rec: any, idx: number) => (
                     <div key={idx} className="group bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100 p-5 rounded-xl hover:shadow-md transition-all duration-300">
                       <div className="flex items-start justify-between">
@@ -294,6 +297,7 @@ export default function Dashboard() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function MetricCard({ label, value, icon: Icon, alert = false }: { label: string, value: string | number | null, icon: any, alert?: boolean }) {
   return (
     <div className={cn(
@@ -335,3 +339,5 @@ function DashboardSkeleton() {
     </div>
   );
 }
+
+

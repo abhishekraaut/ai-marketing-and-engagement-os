@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthContext';
-import { socialAccountsApi } from '@/lib/api/client';
+import { SocialAccount,  socialAccountsApi } from '@/lib/api/client';
 import { Settings, Briefcase, Camera, Users, Hash, CheckCircle2, Link2, LogOut, ArrowRight, ShieldCheck, RefreshCcw, MonitorPlay, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastContext';
@@ -63,7 +63,7 @@ export default function SettingsPage() {
   if (!ORG_ID) return <SettingsSkeleton />;
 
   const getAccountForPlatform = (platformId: string) => {
-    return accounts?.find((acc: any) => acc.platform === platformId);
+    return accounts?.find((acc: SocialAccount) => acc.platform === platformId);
   };
 
   return (
@@ -198,7 +198,7 @@ export default function SettingsPage() {
                   placeholder="e.g. MyBrand Official"
                 />
                 <p className="text-xs text-slate-500 mt-2">
-                  In a real scenario, this would redirect to the platform's OAuth flow.
+                  In a real scenario, this would redirect to the platform&apos;s OAuth flow.
                 </p>
               </div>
             </div>

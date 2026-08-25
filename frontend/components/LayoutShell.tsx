@@ -40,14 +40,10 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       setIsOffline(false);
       toast({ title: 'Back online', description: "You're connected again.", type: 'success' });
     };
-    const handleOffline = () => {
-      setIsOffline(true);
-      toast({ title: 'You are offline', description: 'Changes will resume when your connection returns.', type: 'error' });
-    };
+    const handleOffline = () => setIsOffline(true);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    setIsOffline(!navigator.onLine);
 
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -61,7 +57,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       <>
         {isOffline && (
           <div className="bg-amber-500 text-white text-center py-1 text-sm font-medium">
-            You're offline. Please check your connection.
+            You&apos;re offline. Please check your connection.
           </div>
         )}
         {children}
@@ -118,7 +114,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       {isOffline && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-center py-1 text-sm font-medium flex items-center justify-center gap-2">
           <WifiOff className="w-4 h-4" />
-          You're offline. Changes will resume when your connection returns.
+          You&apos;re offline. Changes will resume when your connection returns.
         </div>
       )}
 
@@ -295,3 +291,5 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
     </>
   );
 }
+
+

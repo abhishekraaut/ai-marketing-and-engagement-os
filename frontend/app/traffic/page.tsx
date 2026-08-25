@@ -63,7 +63,7 @@ export default function WebTrafficPage() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'umami' | 'matomo' | 'ga' | 'clarity')}
               className={`pb-4 text-sm font-medium transition-colors relative ${
                 activeTab === tab.id
                   ? 'text-indigo-600'
@@ -84,13 +84,13 @@ export default function WebTrafficPage() {
           {activeTab === 'umami' && (
             <div className="flex-1 w-full h-full relative">
               <div className="absolute top-2 right-2 flex space-x-2 z-10">
-                <a href="http://localhost:3001" target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-slate-200 flex items-center space-x-1 text-xs font-medium">
+                <a href={process.env.NEXT_PUBLIC_UMAMI_URL || "https://us.umami.is"} target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-slate-200 flex items-center space-x-1 text-xs font-medium">
                   <ExternalLink className="w-3 h-3" />
                   <span>Open Umami App</span>
                 </a>
               </div>
               <iframe 
-                src="http://localhost:3001/share/mock_umami_id/dashboard" 
+                src={`${process.env.NEXT_PUBLIC_UMAMI_URL || "https://us.umami.is"}/share/mock_umami_id/dashboard`} 
                 className="w-full h-full border-0"
                 title="Umami Dashboard"
               />
@@ -100,13 +100,13 @@ export default function WebTrafficPage() {
           {activeTab === 'matomo' && (
             <div className="flex-1 w-full h-full relative">
               <div className="absolute top-2 right-2 flex space-x-2 z-10">
-                <a href="http://localhost:8080" target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-slate-200 flex items-center space-x-1 text-xs font-medium">
+                <a href={process.env.NEXT_PUBLIC_MATOMO_URL || "https://matomo.org"} target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-slate-200 flex items-center space-x-1 text-xs font-medium">
                   <ExternalLink className="w-3 h-3" />
                   <span>Open Matomo App</span>
                 </a>
               </div>
               <iframe 
-                src="http://localhost:8080/index.php?module=Widgetize&action=iframe&moduleToWidgetize=Dashboard&actionToWidgetize=index&idSite=1&period=day&date=yesterday" 
+                src={`${process.env.NEXT_PUBLIC_MATOMO_URL || "https://matomo.org"}/index.php?module=Widgetize&action=iframe&moduleToWidgetize=Dashboard&actionToWidgetize=index&idSite=1&period=day&date=yesterday`} 
                 className="w-full h-full border-0"
                 title="Matomo Dashboard"
               />
@@ -197,3 +197,5 @@ export default function WebTrafficPage() {
     </div>
   );
 }
+
+
