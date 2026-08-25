@@ -74,5 +74,5 @@ services:
 databases:
   - name: marketing-os-db
     databaseName: marketing_os
-    user: admin
+    user: abhi
     plan: free
