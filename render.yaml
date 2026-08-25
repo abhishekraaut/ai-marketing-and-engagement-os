@@ -1,14 +1,14 @@
 services:
 
   # =========================
-  # FastAPI API
+  # FastAPI API (Web Service - Free)
   # =========================
   - type: web
     name: marketing-os-api
+    plan: free
     runtime: python
     buildCommand: "cd backend && pip install -r requirements.txt"
     startCommand: "cd backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -31,13 +31,17 @@ services:
 
 
   # =========================
-  # Celery Worker
+  # Celery Worker + Beat
+  # Combined Web Service - Free
   # =========================
-  - type: worker
+  - type: web
     name: marketing-os-worker
+    plan: free
     runtime: python
+
     buildCommand: "cd backend && pip install -r requirements.txt"
-    startCommand: "cd backend && celery -A app.workers.celery_app worker --loglevel=info"
+
+    startCommand: "cd backend && (python -m http.server $PORT & celery -A app.workers.celery_app worker --loglevel=info -B)"
 
     envVars:
       - key: DATABASE_URL
@@ -56,29 +60,7 @@ services:
 
 
   # =========================
-  # Celery Beat
-  # =========================
-  - type: worker
-    name: marketing-os-beat
-    runtime: python
-    buildCommand: "cd backend && pip install -r requirements.txt"
-    startCommand: "cd backend && celery -A app.workers.celery_app beat --loglevel=info"
-
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: marketing-os-db
-          property: connectionString
-
-      - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: marketing-os-redis
-          property: connectionString
-
-
-  # =========================
-  # Redis / Valkey
+  # Redis / Valkey (Free)
   # =========================
   - type: keyvalue
     name: marketing-os-redis
@@ -87,10 +69,9 @@ services:
 
 
 # =========================
-# PostgreSQL
+# PostgreSQL (Free)
 # =========================
 databases:
-
   - name: marketing-os-db
     databaseName: marketing_os
     user: admin
