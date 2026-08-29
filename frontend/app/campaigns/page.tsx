@@ -14,7 +14,7 @@ const AVAILABLE_FORMATS = ['Standard Post', 'Short Video/Reel', 'Long-form Video
 
 export default function CampaignsPage() {
   const { currentOrgId: ORG_ID } = useAuth();
-  const { data: celeryHealth, isLoading: celeryLoading } = useQuery({ queryKey: ['celeryHealth'], queryFn: () => systemApi.checkCeleryHealth(), refetchInterval: 10000 });
+  const { data: celeryHealth } = useQuery({ queryKey: ['celeryHealth'], queryFn: () => systemApi.checkCeleryHealth(), refetchInterval: 10000 });
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -26,8 +26,12 @@ export default function CampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['LINKEDIN', 'X', 'INSTAGRAM', 'FACEBOOK', 'YOUTUBE']);
   const [selectedFormat, setSelectedFormat] = useState<string>('Standard Post');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [generatedContent, setGeneratedContent] = useState<any>(null);
+  
+  interface GeneratedContent {
+    content_item_id: number;
+    variants: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }[];
+  }
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [activeTab, setActiveTab] = useState<string>('LINKEDIN');
   const [scheduleData, setScheduleData] = useState({ date: '', time: '' });
   const [selectedTrends, setSelectedTrends] = useState<string[]>([]);
@@ -96,7 +100,7 @@ export default function CampaignsPage() {
       throw new Error("Invalid action");
     },
     onSuccess: (updatedVariant: { id?: number, status?: string }, variables) => {
-      setGeneratedContent((prev: { variants: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }[] }) => {
+      setGeneratedContent((prev) => {
         if (!prev) return prev;
         const newVariants = prev.variants.map((v: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }) => {
           if (variables.action === 'schedule' && v.platform === activeTab) {
@@ -116,6 +120,7 @@ export default function CampaignsPage() {
 
 
   const handleAction = (action: string, variant: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }) => {
+    if (!generatedContent) return;
     if (action === 'schedule') {
       let dt;
       if (variant.postNow) {
