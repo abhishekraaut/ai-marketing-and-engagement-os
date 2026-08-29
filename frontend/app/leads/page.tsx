@@ -28,6 +28,11 @@ export default function LeadsPage() {
   const saveMutation = useMutation({
     mutationFn: (data: Partial<Lead>) => editingId ? leadsApi.updateLead(ORG_ID!, editingId, data) : leadsApi.createLead(ORG_ID!, data),
     onSuccess: () => {
+      // Fire Meta Pixel tracking for Lead Generation
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Lead');
+      }
+
       queryClient.invalidateQueries({ queryKey: ['leads', ORG_ID] });
       toast({ title: 'Success', description: `Lead ${editingId ? 'updated' : 'created'}.`, type: 'success' });
       setIsModalOpen(false);

@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { campaignsApi, contentApi, schedulesApi, socialAccountsApi, trendsApi, Campaign } from '@/lib/api/client';
+import { campaignsApi, systemApi, contentApi, schedulesApi, socialAccountsApi, trendsApi, Campaign } from '@/lib/api/client';
 import { getErrorMessage } from '@/lib/api/errors';
-import { formatISO } from 'date-fns';
+
 import { useToast } from '@/components/ui/ToastContext';
 import { Megaphone, Calendar, Clock, CheckCircle, XCircle, Sparkles, Send, Layout, Layers, Loader2, Plus, ArrowRight, Activity, MessageSquare, TrendingUp } from 'lucide-react';
 
@@ -14,9 +14,11 @@ const AVAILABLE_FORMATS = ['Standard Post', 'Short Video/Reel', 'Long-form Video
 
 export default function CampaignsPage() {
   const { currentOrgId: ORG_ID } = useAuth();
+  const { data: celeryHealth, isLoading: celeryLoading } = useQuery({ queryKey: ['celeryHealth'], queryFn: () => systemApi.checkCeleryHealth(), refetchInterval: 10000 });
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Partial<Campaign>>({ name: '', objective: '', topic: '' });
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -98,10 +100,10 @@ export default function CampaignsPage() {
         if (!prev) return prev;
         const newVariants = prev.variants.map((v: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }) => {
           if (variables.action === 'schedule' && v.platform === activeTab) {
-             return { ...v, status: 'SCHEDULED' };
+            return { ...v, status: 'SCHEDULED' };
           }
           if (v.id === updatedVariant.id || v.platform === activeTab) {
-             return { ...v, status: updatedVariant.status || 'SCHEDULED' }; 
+            return { ...v, status: updatedVariant.status || 'SCHEDULED' };
           }
           return v;
         });
@@ -112,35 +114,35 @@ export default function CampaignsPage() {
     onError: (error: Error) => toast({ title: 'Action Failed', description: getErrorMessage(error), type: 'error' })
   });
 
-   
+
   const handleAction = (action: string, variant: { platform: string; status: string; id: number; postNow?: boolean; content?: string; text?: string; caption?: string; }) => {
     if (action === 'schedule') {
-       let dt;
-       if (variant.postNow) {
-          dt = new Date();
-       } else {
-          if (!scheduleData.date || !scheduleData.time) {
-             toast({ title: 'Missing Date/Time', description: 'Please pick a date and time', type: 'error' });
-             return;
-          }
-          dt = new Date(`${scheduleData.date}T${scheduleData.time}`);
-       }
-       actionMutation.mutate({
-         action, 
-         contentId: generatedContent.content_item_id, 
-         variantId: variant.id || 1,
-         payload: {
-           social_account_id: accounts?.[0]?.id || 1,
-           scheduled_at: formatISO(dt),
-           timezone: "UTC"
-         }
-       });
+      let dt;
+      if (variant.postNow) {
+        dt = new Date();
+      } else {
+        if (!scheduleData.date || !scheduleData.time) {
+          toast({ title: 'Missing Date/Time', description: 'Please pick a date and time', type: 'error' });
+          return;
+        }
+        dt = new Date(`${scheduleData.date}T${scheduleData.time}`);
+      }
+      actionMutation.mutate({
+        action,
+        contentId: generatedContent.content_item_id,
+        variantId: variant.id || 1,
+        payload: {
+          social_account_id: accounts?.[0]?.id || 1,
+          scheduled_at: dt.toISOString(),
+          timezone: "UTC"
+        }
+      });
     } else {
-       actionMutation.mutate({
-         action, 
-         contentId: generatedContent.content_item_id, 
-         variantId: variant.id || 1
-       });
+      actionMutation.mutate({
+        action,
+        contentId: generatedContent.content_item_id,
+        variantId: variant.id || 1
+      });
     }
   };
 
@@ -193,7 +195,7 @@ export default function CampaignsPage() {
               <input value={formData.topic} onChange={e => setFormData({ ...formData, topic: e.target.value })} className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none" placeholder="e.g. New AI features" />
             </div>
           </div>
-          
+
           <div className="flex justify-end space-x-4 pt-4 border-t border-slate-100">
             <button type="button" onClick={() => setIsCreating(false)} className="px-5 py-2.5 text-slate-700 font-medium hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
             <button type="submit" disabled={saveStatus === 'saving' || saveStatus === 'saved'} className="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all disabled:opacity-70 flex items-center gap-2 min-w-[150px] justify-center">
@@ -216,7 +218,7 @@ export default function CampaignsPage() {
               </div>
               <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); setSelectedTrends([]); }} className="text-slate-400 hover:text-slate-700 hover:bg-slate-200 p-2 rounded-full transition-colors"><XCircle className="w-6 h-6" /></button>
             </div>
-            
+
             <div className="p-6 flex-1 overflow-y-auto bg-slate-50/30">
               {!generatedContent && !generateMutation.isPending && (
                 <div className="max-w-2xl mx-auto py-12 text-center space-y-8">
@@ -261,11 +263,10 @@ export default function CampaignsPage() {
                           <button
                             key={t.id}
                             onClick={() => setSelectedTrends(prev => prev.includes(t.title) ? prev.filter(x => x !== t.title) : [...prev, t.title])}
-                            className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all border ${
-                              selectedTrends.includes(t.title) 
-                                ? 'bg-indigo-100 text-indigo-700 border-indigo-200' 
+                            className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all border ${selectedTrends.includes(t.title)
+                                ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
                                 : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
-                            }`}
+                              }`}
                           >
                             #{t.title.replace(/\s+/g, '')}
                           </button>
@@ -275,7 +276,7 @@ export default function CampaignsPage() {
                       <div className="text-sm text-slate-500 italic">Loading trends...</div>
                     )}
                   </div>
-                  
+
                   <div className="pt-8 border-t border-slate-100">
                     <button
                       onClick={() => generateMutation.mutate({ campaignId: selectedCampaign.id, platforms: selectedPlatforms, format: selectedFormat })}
@@ -318,7 +319,7 @@ export default function CampaignsPage() {
                       </button>
                     ))}
                   </div>
-                  
+
                   {/* Main Content Area */}
                   <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
                     { }
@@ -329,7 +330,7 @@ export default function CampaignsPage() {
                             {getStatusBadge(v.status)}
                             <span className="text-sm font-medium text-slate-500">Variant ID: {v.id || 'Draft'}</span>
                           </div>
-                          
+
                           <div className="flex items-center gap-3">
                             {(!v.status || v.status === 'DRAFT') && (
                               <button onClick={() => handleAction('submit', v)} className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-lg hover:bg-indigo-100 transition-colors">
@@ -355,8 +356,8 @@ export default function CampaignsPage() {
                                   <div className="flex-grow border-t border-slate-200"></div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <input type="date" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({...scheduleData, date: e.target.value})} />
-                                  <input type="time" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({...scheduleData, time: e.target.value})} />
+                                  <input type="date" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({ ...scheduleData, date: e.target.value })} />
+                                  <input type="time" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({ ...scheduleData, time: e.target.value })} />
                                   <button onClick={() => handleAction('schedule', v)} className="flex items-center justify-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
                                     <Clock className="w-4 h-4" /> Schedule
                                   </button>
@@ -365,7 +366,7 @@ export default function CampaignsPage() {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="p-8 flex-1 overflow-y-auto">
                           <div className="max-w-2xl mx-auto space-y-8">
                             <div>
@@ -392,7 +393,7 @@ export default function CampaignsPage() {
                 </div>
               )}
             </div>
-            
+
             <div className="px-6 py-4 border-t border-slate-200 bg-white flex justify-between items-center rounded-b-2xl">
               <span className="text-sm text-slate-500 flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-400" /> AI-generated content follows Brand Guardrails</span>
               <div className="flex space-x-3">
@@ -414,10 +415,10 @@ export default function CampaignsPage() {
           <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
             <h3 className="font-bold text-slate-800">Active Campaigns</h3>
           </div>
-          
+
           {isLoading ? (
             <div className="p-6 space-y-4">
-              {[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}
+              {[1, 2, 3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}
             </div>
           ) : campaigns?.length === 0 ? (
             <div className="p-12 text-center text-slate-500">
@@ -460,11 +461,17 @@ export default function CampaignsPage() {
           )}
         </div>
       )}
-      
+
       <div className="flex items-center space-x-2 pt-6 pb-2 text-sm text-slate-500 font-medium justify-center">
-        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
-        <Activity className="w-4 h-4" />
-        <span>Publishing Engine & Celery Beat Active</span>
+        {celeryHealth?.status === 'active' ? (
+          <><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
+            <Activity className="w-4 h-4 text-emerald-600" />
+            <span className="text-emerald-700">Publishing Engine Active</span></>
+        ) : (
+          <><div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.8)]"></div>
+            <Activity className="w-4 h-4 text-rose-500" />
+            <span className="text-rose-600">Workers Inactive (Start Redis & Celery)</span></>
+        )}
       </div>
     </div>
   );

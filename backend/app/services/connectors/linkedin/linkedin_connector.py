@@ -29,8 +29,7 @@ class LinkedInConnector(SocialConnector):
 
     def publish_post(self, content: str, media_urls: list = None, account_name: str = None) -> dict:
         if not self._has_credentials():
-            logger.warning("No LINKEDIN_ACCESS_TOKEN found. Falling back to mock connector for publish_post.")
-            return mock_connector.publish_post(content, media_urls, account_name)
+            return {"success": False, "permanent": True, "error": "Missing LinkedIn Credentials"}
             
         try:
             from datetime import datetime, timezone
@@ -38,10 +37,10 @@ class LinkedInConnector(SocialConnector):
             org_urn = os.getenv("LINKEDIN_ORGANIZATION_URN")
             person_urn = os.getenv("LINKEDIN_PERSON_URN")
             
-            if org_urn:
-                author_urn = f"urn:li:organization:{org_urn.replace('urn:li:organization:', '')}"
-            elif person_urn:
+            if person_urn:
                 author_urn = f"urn:li:person:{person_urn.replace('urn:li:person:', '')}"
+            elif org_urn:
+                author_urn = f"urn:li:organization:{org_urn.replace('urn:li:organization:', '')}"
             else:
                 raise ValueError("LINKEDIN_PERSON_URN or LINKEDIN_ORGANIZATION_URN environment variable must be set.")
                 
@@ -49,8 +48,30 @@ class LinkedInConnector(SocialConnector):
                 "Authorization": f"Bearer {self.access_token}",
                 "Content-Type": "application/json",
                 "X-Restli-Protocol-Version": "2.0.0",
-                "LinkedIn-Version": "202608"
+                "LinkedIn-Version": "202401"
             }
+            
+            # Step 1 & 2: Handle Media Upload if media_urls exist
+            
+            share_media_category = "NONE"
+            media_assets = []
+            
+            if media_urls and len(media_urls) > 0:
+                # Real implementation involves registering the upload, downloading the URL bytes, and uploading to LinkedIn
+                # For this implementation, we will format it for IMAGE. Video requires a different API flow (videoV2).
+                share_media_category = "IMAGE"
+                for url in media_urls:
+                    # In a fully connected setup, you would:
+                    # 1. POST to /v2/assets?action=registerUpload
+                    # 2. PUT bytes to the uploadUrl
+                    # 3. Use the asset string here.
+                    # As a placeholder since we don't have binary processing overhead setup:
+                    media_assets.append({
+                        "status": "READY",
+                        "description": {"text": "Media from AI OS"},
+                        "originalUrl": url,
+                        "title": {"text": "Media"}
+                    })
             
             payload = {
                 "author": author_urn,
@@ -60,13 +81,17 @@ class LinkedInConnector(SocialConnector):
                         "shareCommentary": {
                             "text": content
                         },
-                        "shareMediaCategory": "NONE"
+                        "shareMediaCategory": share_media_category,
+                        "media": media_assets if media_assets else None
                     }
                 },
                 "visibility": {
                     "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
                 }
             }
+            
+            if not media_assets:
+                del payload["specificContent"]["com.linkedin.ugc.ShareContent"]["media"]
             
             response = httpx.post("https://api.linkedin.com/v2/ugcPosts", headers=headers, json=payload)
             response.raise_for_status()
@@ -80,10 +105,11 @@ class LinkedInConnector(SocialConnector):
                 "published_at": datetime.now(timezone.utc).isoformat()
             }
         except Exception as e:
-            logger.error(f"Error publishing to LinkedIn: {e}")
-            if 'response' in locals() and hasattr(response, 'text'):
-                logger.error(f"LinkedIn API Response: {response.text}")
-            return {"success": False, "permanent": False, "error": str(e)}
+            is_permanent = False
+            if isinstance(e, httpx.HTTPStatusError) and 400 <= e.response.status_code < 500:
+                is_permanent = True
+            logger.error(f"Error publishing: {e}")
+            return {"success": False, "permanent": is_permanent, "error": str(e)}
 
     def get_post(self, post_id: str) -> dict:
         if not self._has_credentials():
@@ -92,47 +118,63 @@ class LinkedInConnector(SocialConnector):
 
     def get_analytics(self, post_id: str, platform_name: str = "LINKEDIN") -> dict:
         if not self._has_credentials():
-            logger.warning("No LINKEDIN_ACCESS_TOKEN found. Falling back to mock connector for get_analytics.")
-            return mock_connector.get_analytics(post_id, platform_name)
+            return {"platform": platform_name, "external_post_id": post_id, "impressions": 0, "reach": 0, "likes": 0, "comments": 0, "shares": 0, "clicks": 0, "engagement_rate": 0.0}
             
         try:
-            if post_id == "urn:li:share:7497300122347765761":
+            headers = {
+                "Authorization": f"Bearer {self.access_token}",
+                "X-Restli-Protocol-Version": "2.0.0",
+                "LinkedIn-Version": "202401"
+            }
+            
+            # Use Real LinkedIn Organizational Entity Share Statistics API
+            org_urn = os.getenv("LINKEDIN_ORGANIZATION_URN")
+            if not org_urn:
+                raise ValueError("LINKEDIN_ORGANIZATION_URN is required for real analytics.")
+            
+            # Format: urn:li:organization:12345
+            url = f"https://api.linkedin.com/rest/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity={org_urn}&shares[0]={post_id}"
+            
+            response = httpx.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            elements = data.get("elements", [])
+            if not elements:
+                # Fallback to zero if post is too new or no data
                 return {
                     "platform": platform_name,
                     "external_post_id": post_id,
-                    "impressions": 160,
-                    "reach": 92,
-                    "likes": 1,
-                    "comments": 1,
+                    "impressions": 0,
+                    "reach": 0,
+                    "likes": 0,
+                    "comments": 0,
                     "shares": 0,
-                    "clicks": 1,
-                    "engagement_rate": round(2 / 160 * 100, 2)
+                    "clicks": 0,
+                    "engagement_rate": 0.0
                 }
-
-            import hashlib
-            from datetime import datetime, timezone
-            # Generate deterministic but "growing" dynamic numbers based on post_id and current time
-            seed = int(hashlib.md5(post_id.encode()).hexdigest()[:8], 16)
-            hours_elapsed = max(1, (datetime.now(timezone.utc).timestamp() % 86400) / 3600)
             
-            impressions = int((seed % 1000) * hours_elapsed) + 100
-            likes = int(impressions * 0.05)
-            comments = int(impressions * 0.01)
+            stats = elements[0].get("totalShareStatistics", {})
+            impressions = stats.get("impressionCount", 0)
+            likes = stats.get("likeCount", 0)
+            comments = stats.get("commentCount", 0)
+            shares = stats.get("shareCount", 0)
+            clicks = stats.get("clickCount", 0)
             
             return {
                 "platform": platform_name,
                 "external_post_id": post_id,
                 "impressions": impressions,
-                "reach": int(impressions * 0.8),
+                "reach": impressions, # LinkedIn doesn't strictly split reach from impressions on basic tier
                 "likes": likes,
                 "comments": comments,
-                "shares": int(likes * 0.1),
-                "clicks": int(impressions * 0.03),
-                "engagement_rate": round((likes + comments) / impressions * 100, 2) if impressions else 0
+                "shares": shares,
+                "clicks": clicks,
+                "engagement_rate": round(stats.get("engagementRate", 0) * 100, 2) if impressions else 0.0
             }
         except Exception as e:
             logger.error(f"Error fetching LinkedIn analytics: {e}")
-            return mock_connector.get_analytics(post_id, platform_name)
+            return {"platform": platform_name, "external_post_id": post_id, "impressions": 0, "reach": 0, "likes": 0, "comments": 0, "shares": 0, "clicks": 0, "engagement_rate": 0.0}
 
     def get_comments(self, post_id: str) -> list:
         if not self._has_credentials():

@@ -67,11 +67,23 @@ class PublishingService:
             # Call Mock Connector
             self._log_audit(db, org_id, "POST_PUBLISH_STARTED", "Schedule", schedule.id)
             
+            
             from app.services.connectors.factory import get_connector
             connector = get_connector(account.platform.value)
             
+            # Append hashtags to the content
+            final_content = variant.content or ""
+            if variant.hashtags:
+                formatted_tags = []
+                for t in variant.hashtags:
+                    tag = t.strip()
+                    if tag:
+                        formatted_tags.append(tag if tag.startswith("#") else f"#{tag}")
+                if formatted_tags:
+                    final_content = final_content.strip() + "\n\n" + " ".join(formatted_tags)
+
             connector_res = connector.publish_post(
-                content=variant.content,
+                content=final_content,
                 media_urls=variant.media_urls,
                 account_name=account.account_name if account.account_name != "ERROR" else "ERROR"
             )

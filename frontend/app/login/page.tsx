@@ -141,8 +141,8 @@ export default function LoginPage() {
             <div className="bg-slate-800/50 rounded-lg border border-slate-700/50 p-4 space-y-3">
               {[
                 { role: 'Admin', email: 'abhishek@aiagency.com' },
-                { role: 'Editor', email: 'marketing@aiagency.com' },
-                { role: 'Viewer', email: 'content@aiagency.com' },
+                // { role: 'Editor', email: 'marketing@aiagency.com' },
+                // { role: 'Viewer', email: 'content@aiagency.com' },
               ].map((account) => (
                 <div key={account.role} className="flex justify-between items-center text-sm">
                   <span className="text-slate-300 font-medium">{account.role}</span>

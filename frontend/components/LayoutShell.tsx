@@ -128,13 +128,13 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
             <span className="font-bold text-lg text-white tracking-tight">Marketing OS</span>
           </div>
         </div>
-        
+
         <div className="p-4 shrink-0">
-          <button 
+          <button
             className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-400 bg-slate-800/50 hover:bg-slate-800 rounded-md border border-slate-700/50 transition-colors"
             onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
           >
-            <span className="flex items-center gap-2"><Search className="w-4 h-4"/> Search...</span>
+            <span className="flex items-center gap-2"><Search className="w-4 h-4" /> Search...</span>
             <kbd className="text-xs font-sans bg-slate-700 px-1.5 py-0.5 rounded text-slate-300">⌘K</kbd>
           </button>
         </div>
@@ -154,8 +154,8 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                       href={item.href}
                       className={cn(
                         "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
-                        isActive 
-                          ? "bg-indigo-600/10 text-indigo-400" 
+                        isActive
+                          ? "bg-indigo-600/10 text-indigo-400"
                           : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                       )}
                     >
@@ -171,7 +171,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
             </div>
           ))}
         </nav>
-        
+
         <div className="p-4 border-t border-slate-800 space-y-1">
           <Link
             href="/settings"
@@ -195,10 +195,10 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 relative">
-        
+
         {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-slate-900/50 z-40 md:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
@@ -220,7 +220,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
               <X className="w-6 h-6" />
             </button>
           </div>
-          
+
           <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto scrollbar-hide">
             {navGroups.map((group) => (
               <div key={group.title}>
@@ -237,8 +237,8 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={cn(
                           "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
-                          isActive 
-                            ? "bg-indigo-600/10 text-indigo-400" 
+                          isActive
+                            ? "bg-indigo-600/10 text-indigo-400"
                             : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                         )}
                       >
@@ -259,7 +259,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-10 shadow-sm">
           <div className="flex items-center space-x-4">
-            <button 
+            <button
               className="md:hidden text-slate-500 hover:text-indigo-600 transition-colors p-1"
               onClick={() => setIsMobileMenuOpen(true)}
             >

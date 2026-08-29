@@ -67,6 +67,15 @@ export async function downloadAPI(endpoint: string, filename: string) {
 }
 
 // ------------------------------------------------------------------
+// System Health
+// ------------------------------------------------------------------
+export const systemApi = {
+  checkCeleryHealth: () => {
+    return fetch(`${API_BASE_URL}/health/celery`).then((res) => res.json());
+  }
+};
+
+// ------------------------------------------------------------------
 // Auth
 // ------------------------------------------------------------------
 export const authApi = {

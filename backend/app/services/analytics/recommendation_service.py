@@ -36,8 +36,8 @@ class RecommendationService:
         user_prompt = f"Analyze the following marketing metrics and provide optimization recommendations.\nContext: {json.dumps(context)}"
         
         # 3. Call LLM
-        llm_provider = get_llm_provider()
         try:
+            llm_provider = get_llm_provider()
             result: AIRecommendationList = await llm_provider.generate(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,

@@ -26,6 +26,7 @@ app.add_middleware(
     allow_origins=[
         "https://ai-marketing-and-engagement-os.vercel.app",
         "http://localhost:3000",
+        "http://localhost:3001",
     ],
     allow_credentials=True,
     allow_methods=["*"],
