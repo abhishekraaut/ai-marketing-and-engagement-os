@@ -8,11 +8,11 @@ from app.services.connectors.base import SocialConnector
 logger = logging.getLogger(__name__)
 
 class InstagramConnector(SocialConnector):
-    def __init__(self):
+    def __init__(self, access_token=None, ig_account_id=None):
         from dotenv import load_dotenv
         load_dotenv()
-        self.access_token = os.getenv("META_ACCESS_TOKEN") or os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN")
-        self.ig_account_id = os.getenv("META_APP_ID") or os.getenv("INSTAGRAM_ACCOUNT_ID")
+        self.access_token = access_token or os.getenv("META_ACCESS_TOKEN") or os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN")
+        self.ig_account_id = ig_account_id or os.getenv("META_APP_ID") or os.getenv("INSTAGRAM_ACCOUNT_ID")
         
     def _has_credentials(self) -> bool:
         return bool(self.access_token and self.ig_account_id)
@@ -117,8 +117,53 @@ class InstagramConnector(SocialConnector):
             logger.error(f"Error fetching IG analytics: {e}")
             return {"platform": platform_name, "external_post_id": post_id, "impressions": 0, "likes": 0, "comments": 0}
 
-    def get_comments(self, post_id: str) -> list:
-        return []
+    def get_comments(self, post_id: str = None) -> list:
+        if not self._has_credentials():
+            return []
+            
+        try:
+            # Instagram Graph API allows fetching media and comments
+            url = f"https://graph.facebook.com/v19.0/{self.ig_account_id}/media?fields=comments%7Btext,from,timestamp%7D&access_token={self.access_token}"
+            response = httpx.get(url)
+            response.raise_for_status()
+            
+            engagements = []
+            data = response.json().get("data", [])
+            for media in data:
+                comments = media.get("comments", {}).get("data", [])
+                for comment in comments:
+                    sender = comment.get("from", {})
+                    # Add simple filtering if needed
+                    engagements.append({
+                        "external_engagement_id": comment.get("id"),
+                        "content": comment.get("text"),
+                        "author_name": sender.get("username", "IG User"),
+                        "author_id": sender.get("id"),
+                        "created_at": comment.get("timestamp"),
+                        "platform": "INSTAGRAM",
+                        "type": "COMMENT",
+                        "post_id": media.get("id")
+                    })
+                        
+            return engagements
+        except Exception as e:
+            logger.error(f"Error fetching IG comments: {e}")
+            return []
 
     def reply_to_comment(self, comment_id: str, text: str) -> str:
-        return "replied"
+        if not self._has_credentials():
+            return "error"
+            
+        try:
+            # Meta Graph API: POST /{comment_id}/replies
+            url = f"https://graph.facebook.com/v19.0/{comment_id}/replies"
+            payload = {
+                "message": text,
+                "access_token": self.access_token
+            }
+            res = httpx.post(url, data=payload)
+            res.raise_for_status()
+            return "replied"
+        except Exception as e:
+            logger.error(f"Error replying on IG: {e}")
+            return "error"

@@ -7,11 +7,11 @@ from app.services.connectors.base import SocialConnector
 logger = logging.getLogger(__name__)
 
 class FacebookConnector(SocialConnector):
-    def __init__(self):
+    def __init__(self, access_token=None, page_id=None):
         from dotenv import load_dotenv
         load_dotenv()
-        self.access_token = os.getenv("META_ACCESS_TOKEN") or os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN")
-        self.page_id = os.getenv("META_APP_ID") or os.getenv("FACEBOOK_PAGE_ID")
+        self.access_token = access_token or os.getenv("META_ACCESS_TOKEN") or os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN")
+        self.page_id = page_id or os.getenv("META_APP_ID") or os.getenv("FACEBOOK_PAGE_ID")
         
     def _has_credentials(self) -> bool:
         return bool(self.access_token and self.page_id)
@@ -98,8 +98,59 @@ class FacebookConnector(SocialConnector):
             logger.error(f"Error fetching FB analytics: {e}")
             return {"platform": platform_name, "external_post_id": post_id, "impressions": 0, "likes": 0, "comments": 0}
 
-    def get_comments(self, post_id: str) -> list:
-        return []
+    def get_comments(self, post_id: str = None) -> list:
+        if not self._has_credentials():
+            return []
+            
+        try:
+            # We fetch conversations (DMs) and comments for the page
+            # To fetch page-level comments, we can query the page feed and comments
+            # Or if post_id is provided, fetch for that post.
+            
+            # For this Phase, we'll fetch Conversations (Inbox)
+            url = f"https://graph.facebook.com/v19.0/{self.page_id}/conversations?fields=messages%7Bmessage,from,created_time%7D&access_token={self.access_token}"
+            response = httpx.get(url)
+            response.raise_for_status()
+            
+            engagements = []
+            data = response.json().get("data", [])
+            for conv in data:
+                messages = conv.get("messages", {}).get("data", [])
+                for msg in messages:
+                    # Don't pull our own messages if from page
+                    sender = msg.get("from", {})
+                    if str(sender.get("id")) != str(self.page_id):
+                        engagements.append({
+                            "external_engagement_id": msg.get("id"),
+                            "content": msg.get("message"),
+                            "author_name": sender.get("name", "Unknown"),
+                            "author_id": sender.get("id"),
+                            "created_at": msg.get("created_time"),
+                            "platform": "FACEBOOK",
+                            "type": "DIRECT_MESSAGE",
+                            "post_id": conv.get("id") # Store conversation ID to reply
+                        })
+                        
+            return engagements
+        except Exception as e:
+            logger.error(f"Error fetching FB comments/DMs: {e}")
+            return []
 
     def reply_to_comment(self, comment_id: str, text: str) -> str:
-        return "replied"
+        if not self._has_credentials():
+            return "error"
+            
+        try:
+            # comment_id could be a message_id or conversation_id based on how we mapped it
+            # Meta Graph API: POST /{conversation_id}/messages
+            url = f"https://graph.facebook.com/v19.0/{comment_id}/messages"
+            payload = {
+                "message": text,
+                "access_token": self.access_token
+            }
+            res = httpx.post(url, data=payload)
+            res.raise_for_status()
+            return "replied"
+        except Exception as e:
+            logger.error(f"Error replying on FB: {e}")
+            return "error"

@@ -57,7 +57,7 @@ export default function CommandCenter() {
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 px-4 text-lg bg-transparent border-0 outline-none placeholder:text-slate-400 text-slate-900"
+            className="flex-1 px-4 text-lg bg-transparent border-0 outline-none placeholder:text-slate-400 text-foreground"
             placeholder="Ask Marketing OS or jump to..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}

@@ -139,7 +139,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
           </button>
         </div>
 
-        <nav className="flex-1 px-4 pb-4 space-y-6 overflow-y-auto scrollbar-hide">
+        <nav className="flex-1 px-4 pb-4 space-y-6 overflow-y-auto app-scrollbar">
           {navGroups.map((group) => (
             <div key={group.title}>
               <h3 className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
@@ -221,7 +221,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
             </button>
           </div>
 
-          <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto scrollbar-hide">
+          <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto app-scrollbar">
             {navGroups.map((group) => (
               <div key={group.title}>
                 <h3 className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
@@ -267,7 +267,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
             </button>
             <div className="md:hidden font-bold text-lg text-indigo-600">Marketing OS</div>
             <div className="hidden md:flex items-center space-x-2 text-sm text-slate-500">
-              <span className="font-medium text-slate-900 bg-slate-100 px-2 py-1 rounded-md">{currentOrgName}</span>
+              <span className="font-medium text-foreground bg-slate-100 px-2 py-1 rounded-md">{currentOrgName}</span>
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -282,8 +282,8 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
-          <div className="mx-auto max-w-7xl">
+        <main className="flex-1 overflow-y-auto app-scrollbar p-4 sm:p-6 lg:p-8 relative">
+          <div className="mx-auto max-w-7xl w-full">
             {children}
           </div>
         </main>

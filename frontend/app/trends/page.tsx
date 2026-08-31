@@ -61,16 +61,16 @@ export default function TrendsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="page-title flex items-center gap-2">
             <TrendingUp className="w-6 h-6 text-indigo-600" />
             Trend Discovery
           </h1>
-          <p className="text-slate-500 mt-1">Discover trending topics and let AI evaluate their relevance to your Brand Brain.</p>
+          <p className="page-description">Discover trending topics and let AI evaluate their relevance to your Brand Brain.</p>
         </div>
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-white text-slate-700 border border-border px-4 py-2 rounded-lg text-sm font-semibold hover:bg-muted transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Add Custom Trend
@@ -78,7 +78,7 @@ export default function TrendsPage() {
           <button 
             onClick={() => fetchLiveMutation.mutate()}
             disabled={fetchLiveMutation.isPending}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-600/20 disabled:opacity-50"
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-hover transition-colors shadow-sm shadow-indigo-600/20 disabled:opacity-50"
           >
             <Sparkles className="w-4 h-4" />
             {fetchLiveMutation.isPending ? 'Fetching...' : 'Fetch Live News (AI)'}
@@ -90,14 +90,14 @@ export default function TrendsPage() {
         {/* Left Column: Trend List */}
         <div className="lg:col-span-1 space-y-4">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Current Trends</h2>
-            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-semibold">{trends.length} active</span>
+            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Current Trends</h2>
+            <span className="bg-muted text-slate-600 px-2 py-0.5 rounded-full text-xs font-semibold">{trends.length} active</span>
           </div>
           
-          <div className="flex flex-col space-y-3 max-h-[800px] overflow-y-auto pr-2 scrollbar-hide">
+          <div className="flex flex-col space-y-3 max-h-[800px] overflow-y-auto pr-2 app-scrollbar">
             {trends.length === 0 ? (
-              <div className="text-center p-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                <p className="text-slate-500 text-sm">No active trends found in your industry right now.</p>
+              <div className="text-center p-8 bg-muted rounded-xl border border-dashed border-border">
+                <p className="text-muted-foreground text-sm">No active trends found in your industry right now.</p>
               </div>
             ) : (
               trends.map((trend: Trend) => (
@@ -111,7 +111,7 @@ export default function TrendsPage() {
                     "text-left p-5 rounded-xl border transition-all duration-200 group relative overflow-hidden",
                     selectedTrend === trend.id 
                       ? "border-indigo-500 bg-indigo-50/50 shadow-md ring-1 ring-indigo-500" 
-                      : "border-slate-200 bg-white hover:border-indigo-300 hover:shadow-sm"
+                      : "border-border bg-white hover:border-indigo-300 hover:shadow-sm"
                   )}
                 >
                   {selectedTrend === trend.id && (
@@ -120,20 +120,20 @@ export default function TrendsPage() {
                   <div className="flex justify-between items-start mb-2">
                     <span className={cn(
                       "font-bold pr-2 leading-tight",
-                      selectedTrend === trend.id ? "text-indigo-900" : "text-slate-900"
+                      selectedTrend === trend.id ? "text-indigo-900" : "text-foreground"
                     )}>
                       {trend.title}
                     </span>
                     <span className={cn(
                       "text-[10px] font-extrabold px-2 py-1 rounded-full uppercase tracking-wider shrink-0",
-                      selectedTrend === trend.id ? "bg-indigo-200 text-indigo-800" : "bg-slate-100 text-slate-600"
+                      selectedTrend === trend.id ? "bg-indigo-200 text-indigo-800" : "bg-muted text-slate-600"
                     )}>
                       {trend.category}
                     </span>
                   </div>
                   <p className={cn(
                     "text-sm line-clamp-2",
-                    selectedTrend === trend.id ? "text-indigo-700/80" : "text-slate-500"
+                    selectedTrend === trend.id ? "text-indigo-700/80" : "text-muted-foreground"
                   )}>
                     {trend.description}
                   </p>
@@ -146,17 +146,17 @@ export default function TrendsPage() {
         {/* Right Column: AI Analysis */}
         <div className="lg:col-span-2">
           {selectedTrend ? (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full min-h-[500px] flex flex-col overflow-hidden relative">
+            <div className="bg-white rounded-xl shadow-sm border border-border h-full min-h-[500px] flex flex-col overflow-hidden relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
               
               <div className="p-6 sm:p-8 flex-1">
-                <div className="flex items-center gap-3 mb-8 pb-6 border-b border-slate-100">
+                <div className="flex items-center gap-3 mb-8 pb-6 border-b border-border">
                   <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900">Brand Relevance Analysis</h2>
-                    <p className="text-sm text-slate-500">Evaluating against your configured Brand Brain profile.</p>
+                    <h2 className="text-xl font-bold text-foreground">Brand Relevance Analysis</h2>
+                    <p className="text-sm text-muted-foreground">Evaluating against your configured Brand Brain profile.</p>
                   </div>
                 </div>
                 
@@ -185,7 +185,7 @@ export default function TrendsPage() {
                     
                     {/* Score Card */}
                     <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-6">
-                      <div className="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-100 min-w-[160px]">
+                      <div className="flex flex-col items-center justify-center p-6 bg-muted rounded-2xl border border-border min-w-[160px]">
                         <div className="relative flex items-center justify-center">
                           <svg className="w-24 h-24 transform -rotate-90">
                             <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-200" />
@@ -196,19 +196,19 @@ export default function TrendsPage() {
                               className={cn(
                                 "transition-all duration-1000 ease-out",
                                 evaluateMutation.data.relevance_score > 70 ? 'text-emerald-500' : 
-                                evaluateMutation.data.relevance_score > 40 ? 'text-amber-500' : 'text-slate-400'
+                                evaluateMutation.data.relevance_score > 40 ? 'text-amber-500' : 'text-muted-foreground'
                               )} 
                             />
                           </svg>
-                          <span className="absolute text-3xl font-black text-slate-900">
+                          <span className="absolute text-3xl font-black text-foreground">
                             {evaluateMutation.data.relevance_score}
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Match Score</span>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Match Score</span>
                       </div>
                       
                       <div className="flex-1 flex flex-col justify-center">
-                        <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                        <h3 className="font-bold text-foreground mb-2 flex items-center gap-2">
                           <Zap className="w-4 h-4 text-amber-500" />
                           Strategic Verdict
                         </h3>
@@ -252,11 +252,11 @@ export default function TrendsPage() {
               
               {/* Footer Action */}
               {evaluateMutation.isSuccess && evaluateMutation.data && (
-                <div className="p-6 bg-slate-50 border-t border-slate-100 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <p className="text-sm text-slate-500 font-medium">Ready to capitalize on this trend?</p>
+                <div className="p-6 bg-muted border-t border-border mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <p className="text-sm text-muted-foreground font-medium">Ready to capitalize on this trend?</p>
                   <Link 
                     href={`/campaigns?topic=${encodeURIComponent(trends.find((t: { id: number; title: string }) => t.id === selectedTrend)?.title || '')}`}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-primary-hover transition-all shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300"
                   >
                     Start AI Campaign <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -265,12 +265,12 @@ export default function TrendsPage() {
 
             </div>
           ) : (
-            <div className="bg-slate-50 rounded-xl border-2 border-slate-200 border-dashed h-full min-h-[500px] flex flex-col items-center justify-center p-8 text-center text-slate-500 group transition-colors hover:bg-slate-100 hover:border-slate-300">
+            <div className="bg-muted rounded-xl border-2 border-border border-dashed h-full min-h-[500px] flex flex-col items-center justify-center p-8 text-center text-muted-foreground group transition-colors hover:bg-muted hover:border-slate-300">
               <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <TrendingUp className="w-8 h-8 text-indigo-400" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Select a Trend</h3>
-              <p className="max-w-md text-slate-500">
+              <h3 className="text-xl font-bold text-foreground mb-2">Select a Trend</h3>
+              <p className="max-w-md text-muted-foreground">
                 Choose a trend from the list to see how well it aligns with your brand profile and get AI-generated content angles tailored to your voice.
               </p>
             </div>
@@ -281,9 +281,9 @@ export default function TrendsPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">Add Custom Trend</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">Add Custom Trend</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 text-muted-foreground hover:bg-muted rounded-full">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -331,14 +331,14 @@ export default function TrendsPage() {
                 />
               </div>
             </div>
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">
+            <div className="p-6 bg-muted border-t border-border flex justify-end gap-3">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-foreground">
                 Cancel
               </button>
               <button 
                 onClick={() => createTrendMutation.mutate(formData)}
                 disabled={createTrendMutation.isPending || !formData.title || !formData.description}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-50 transition-colors"
               >
                 {createTrendMutation.isPending ? 'Saving...' : 'Save Trend'}
               </button>
@@ -358,11 +358,11 @@ function TrendsSkeleton() {
         <div className="lg:col-span-1 space-y-4">
           <div className="h-5 bg-slate-200 rounded w-32" />
           {[1,2,3,4,5].map(i => (
-            <div key={i} className="h-28 bg-white border border-slate-200 rounded-xl" />
+            <div key={i} className="h-28 bg-white border border-border rounded-xl" />
           ))}
         </div>
         <div className="lg:col-span-2">
-          <div className="h-[600px] bg-white border border-slate-200 rounded-xl" />
+          <div className="h-[600px] bg-white border border-border rounded-xl" />
         </div>
       </div>
     </div>

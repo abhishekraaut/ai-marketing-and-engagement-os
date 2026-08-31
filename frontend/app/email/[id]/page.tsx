@@ -92,8 +92,8 @@ export default function EmailDetail() {
   if (!email) return (
     <div className="flex flex-col items-center justify-center min-h-[500px] text-center">
       <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4 text-2xl font-bold">!</div>
-      <h2 className="text-xl font-bold text-slate-900 mb-2">Campaign Not Found</h2>
-      <p className="text-slate-500 mb-6">This email campaign might have been deleted or does not exist.</p>
+      <h2 className="text-xl font-bold text-foreground mb-2">Campaign Not Found</h2>
+      <p className="text-muted-foreground mb-6">This email campaign might have been deleted or does not exist.</p>
       <Link href="/email" className="text-indigo-600 font-bold hover:underline">Return to Campaigns</Link>
     </div>
   );
@@ -104,14 +104,14 @@ export default function EmailDetail() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 shrink-0">
         <div>
-          <Link href="/email" className="text-slate-400 hover:text-indigo-600 font-medium text-sm flex items-center gap-1.5 transition-colors mb-2">
+          <Link href="/email" className="text-muted-foreground hover:text-indigo-600 font-medium text-sm flex items-center gap-1.5 transition-colors mb-2">
             <ArrowLeft className="w-4 h-4" /> Back to Campaigns
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{email.name}</h1>
+            <h1 className="page-title">{email.name}</h1>
             <StatusBadge status={email.status} />
           </div>
-          <div className="flex items-center gap-3 text-sm text-slate-500 mt-1.5 font-medium">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1.5 font-medium">
             <span className="flex items-center gap-1.5"><Users className="w-4 h-4" /> {email.audience_name}</span>
             <span>•</span>
             <span>ID: {email.id}</span>
@@ -122,15 +122,15 @@ export default function EmailDetail() {
       <div className="flex flex-col lg:flex-row flex-1 gap-6 min-h-0">
         
         {/* Left Pane - Editor & Flow */}
-        <div className="w-full lg:w-5/12 xl:w-1/2 flex flex-col gap-6 overflow-y-auto pr-2 pb-8 scrollbar-hide">
+        <div className="w-full lg:w-5/12 xl:w-1/2 flex flex-col gap-6 overflow-y-auto pr-2 pb-8 app-scrollbar">
           
           {email.status === 'DRAFT' && !email.body && !editMode && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-border p-8 flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-4">
                 <Sparkles className="w-8 h-8 text-purple-500" />
               </div>
-              <h2 className="text-xl font-bold text-slate-900 mb-2">Generate Campaign Content</h2>
-              <p className="text-slate-500 text-sm max-w-sm mb-8 leading-relaxed">
+              <h2 className="text-xl font-bold text-foreground mb-2">Generate Campaign Content</h2>
+              <p className="text-muted-foreground text-sm max-w-sm mb-8 leading-relaxed">
                 Let AI draft an engaging email based on your Brand Brain identity and target audience parameters.
               </p>
               <button
@@ -147,13 +147,13 @@ export default function EmailDetail() {
           )}
 
           {(editMode || (email.body && ['DRAFT', 'APPROVED'].includes(email.status))) && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1">
-              <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden flex flex-col flex-1">
+              <div className="p-5 border-b border-border bg-muted/50 flex items-center justify-between shrink-0">
+                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <LayoutTemplate className="w-5 h-5 text-indigo-600" /> Content Editor
                 </h2>
                 {!editMode && email.status === 'DRAFT' && (
-                  <button onClick={() => setEditMode(true)} className="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+                  <button onClick={() => setEditMode(true)} className="text-sm font-bold text-primary hover:text-primary-hover flex items-center gap-1">
                     <Edit3 className="w-4 h-4" /> Edit
                   </button>
                 )}
@@ -165,17 +165,17 @@ export default function EmailDetail() {
                   <input 
                     type="text" 
                     disabled={!editMode}
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-slate-50 disabled:border-slate-100 disabled:text-slate-500"
+                    className="w-full border-2 border-border rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-muted disabled:border-border disabled:text-muted-foreground"
                     value={formData.subject}
                     onChange={(e) => setFormData({...formData, subject: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Preview Text <span className="text-slate-400 font-normal">(Optional)</span></label>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Preview Text <span className="text-muted-foreground font-normal">(Optional)</span></label>
                   <input 
                     type="text" 
                     disabled={!editMode}
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-slate-50 disabled:border-slate-100 disabled:text-slate-500"
+                    className="w-full border-2 border-border rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-muted disabled:border-border disabled:text-muted-foreground"
                     value={formData.preview_text}
                     onChange={(e) => setFormData({...formData, preview_text: e.target.value})}
                   />
@@ -184,7 +184,7 @@ export default function EmailDetail() {
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Email Body</label>
                   <textarea 
                     disabled={!editMode}
-                    className="flex-1 w-full border-2 border-slate-200 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-slate-50 disabled:border-slate-100 disabled:text-slate-500 resize-none leading-relaxed"
+                    className="flex-1 w-full border-2 border-border rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-muted disabled:border-border disabled:text-muted-foreground resize-none leading-relaxed"
                     value={formData.body}
                     onChange={(e) => setFormData({...formData, body: e.target.value})}
                   />
@@ -194,7 +194,7 @@ export default function EmailDetail() {
                   <input 
                     type="text" 
                     disabled={!editMode}
-                    className="w-full border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-slate-50 disabled:border-slate-100 disabled:text-slate-500"
+                    className="w-full border-2 border-border rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium transition-all disabled:bg-muted disabled:border-border disabled:text-muted-foreground"
                     value={formData.cta}
                     onChange={(e) => setFormData({...formData, cta: e.target.value})}
                     placeholder="e.g. Shop the Sale"
@@ -202,7 +202,7 @@ export default function EmailDetail() {
                 </div>
               </div>
 
-              <div className="p-5 bg-slate-50/50 border-t border-slate-100 shrink-0 flex justify-end gap-3">
+              <div className="p-5 bg-muted/50 border-t border-border shrink-0 flex justify-end gap-3">
                 {email.status === 'DRAFT' && !editMode && (
                   <button 
                     onClick={() => approveMutation.mutate()}
@@ -219,7 +219,7 @@ export default function EmailDetail() {
                         subject: email.subject || '', preview_text: email.preview_text || '', body: email.body || '', cta: email.cta || ''
                       });
                       setEditMode(false);
-                    }} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:border-slate-300 rounded-xl shadow-sm transition-all flex items-center gap-2">
+                    }} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-foreground bg-white border border-border hover:border-slate-300 rounded-xl shadow-sm transition-all flex items-center gap-2">
                       <X className="w-4 h-4" /> Cancel
                     </button>
                     <button 
@@ -245,7 +245,7 @@ export default function EmailDetail() {
                 <div className="flex gap-4 mb-6">
                   <input 
                     type="datetime-local" 
-                    className="border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium flex-1 transition-all"
+                    className="border-2 border-border rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium flex-1 transition-all"
                     value={scheduleDate}
                     onChange={(e) => setScheduleDate(e.target.value)}
                   />
@@ -259,9 +259,9 @@ export default function EmailDetail() {
                 </div>
                 
                 <div className="relative flex items-center py-2 mb-6">
-                  <div className="flex-grow border-t border-slate-200"></div>
-                  <span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-bold uppercase tracking-widest">or publish immediately</span>
-                  <div className="flex-grow border-t border-slate-200"></div>
+                  <div className="flex-grow border-t border-border"></div>
+                  <span className="flex-shrink-0 mx-4 text-muted-foreground text-xs font-bold uppercase tracking-widest">or publish immediately</span>
+                  <div className="flex-grow border-t border-border"></div>
                 </div>
                 
                 <button 
@@ -276,12 +276,12 @@ export default function EmailDetail() {
           )}
           
           {analytics && email.status === 'SENT' && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden shrink-0">
-               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden shrink-0">
+               <div className="p-5 border-b border-border bg-muted/50 flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-indigo-600" />
-                  <h2 className="text-lg font-bold text-slate-900">Campaign Analytics</h2>
+                  <h2 className="text-lg font-bold text-foreground">Campaign Analytics</h2>
                </div>
-               <div className="p-6 grid grid-cols-2 gap-4 bg-slate-50">
+               <div className="p-6 grid grid-cols-2 gap-4 bg-muted">
                  <StatBox label="Recipients" value={analytics.recipient_count} />
                  <StatBox label="Delivered" value={analytics.delivered} sub={`${(analytics.delivered/analytics.recipient_count*100).toFixed(1)}% Delivery Rate`} />
                  <StatBox label="Open Rate" value={`${analytics.open_rate}%`} sub={`${analytics.opened} Unique Opens`} />
@@ -292,7 +292,7 @@ export default function EmailDetail() {
         </div>
 
         {/* Right Pane - Visual Preview */}
-        <div className="w-full lg:w-7/12 xl:w-1/2 flex flex-col min-h-0 bg-slate-100 rounded-3xl border-4 border-slate-200 shadow-inner overflow-hidden relative">
+        <div className="w-full lg:w-7/12 xl:w-1/2 flex flex-col min-h-0 bg-muted rounded-3xl border-4 border-border shadow-inner overflow-hidden relative">
           
           {/* Mac/Browser Chrome Header */}
           <div className="h-12 bg-slate-200/80 backdrop-blur flex items-center px-4 shrink-0 border-b border-slate-300">
@@ -301,25 +301,25 @@ export default function EmailDetail() {
               <div className="w-3 h-3 rounded-full bg-amber-400 shadow-inner"></div>
               <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-inner"></div>
             </div>
-            <div className="mx-auto bg-white/50 px-4 py-1 rounded-md text-[11px] font-bold text-slate-500 shadow-sm">
+            <div className="mx-auto bg-white/50 px-4 py-1 rounded-md text-[11px] font-bold text-muted-foreground shadow-sm">
               Email Client Preview
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50 flex flex-col scrollbar-hide">
-            <div className="max-w-xl w-full mx-auto bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden flex flex-col shrink-0 animate-in zoom-in-95 duration-300">
+          <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-muted flex flex-col app-scrollbar">
+            <div className="max-w-xl w-full mx-auto bg-white rounded-xl shadow-lg border border-border overflow-hidden flex flex-col shrink-0 animate-in zoom-in-95 duration-300">
               
               {/* Email Envelope Info */}
-              <div className="px-6 py-4 border-b border-slate-100 bg-white">
-                <div className="text-lg font-bold text-slate-900 mb-2">{formData.subject || 'New Email Campaign'}</div>
-                <div className="flex flex-col gap-1 text-sm text-slate-500">
+              <div className="px-6 py-4 border-b border-border bg-white">
+                <div className="text-lg font-bold text-foreground mb-2">{formData.subject || 'New Email Campaign'}</div>
+                <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-slate-700 w-12">From:</span> 
-                    <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-medium">Acme Corp &lt;hello@acme.com&gt;</span>
+                    <span className="bg-muted px-2 py-0.5 rounded text-slate-600 font-medium">Acme Corp &lt;hello@acme.com&gt;</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-slate-700 w-12">To:</span> 
-                    <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-medium">{email.audience_name}</span>
+                    <span className="bg-muted px-2 py-0.5 rounded text-slate-600 font-medium">{email.audience_name}</span>
                   </div>
                 </div>
               </div>
@@ -330,12 +330,12 @@ export default function EmailDetail() {
                   <Sparkles className="w-8 h-8 text-white" />
                 </div>
                 
-                <h1 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+                <h1 className="page-title mb-6 text-center">
                   {email.organization?.name || 'Acme Corp'}
                 </h1>
                 
                 <div className="w-full whitespace-pre-wrap text-slate-700 text-base leading-relaxed mb-10 text-center font-medium">
-                  {formData.body || <span className="text-slate-400 italic">Generate or write content to see preview...</span>}
+                  {formData.body || <span className="text-muted-foreground italic">Generate or write content to see preview...</span>}
                 </div>
                 
                 {formData.cta && (
@@ -344,9 +344,9 @@ export default function EmailDetail() {
                   </button>
                 )}
                 
-                <div className="w-full border-t border-slate-100 pt-8 mt-auto text-center text-[11px] font-medium text-slate-400 space-y-4">
+                <div className="w-full border-t border-border pt-8 mt-auto text-center text-[11px] font-medium text-muted-foreground space-y-4">
                   {formData.preview_text && (
-                    <div className="text-slate-500 italic max-w-xs mx-auto">&quot;{formData.preview_text}&quot;</div>
+                    <div className="text-muted-foreground italic max-w-xs mx-auto">&quot;{formData.preview_text}&quot;</div>
                   )}
                   <div>
                     © {new Date().getFullYear()} {email.organization?.name || 'Acme Corp'}. All rights reserved.<br/>
@@ -374,16 +374,16 @@ function StatusBadge({ status }: { status: string }) {
     return <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"><CheckCircle2 className="w-3.5 h-3.5" /> Approved</span>;
   }
   if (status === 'DRAFT' || status === 'DRAFT_GENERATED') {
-    return <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"><Edit3 className="w-3.5 h-3.5" /> Draft</span>;
+    return <span className="inline-flex items-center gap-1.5 bg-muted text-slate-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"><Edit3 className="w-3.5 h-3.5" /> Draft</span>;
   }
-  return <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">{status}</span>;
+  return <span className="inline-flex items-center gap-1.5 bg-muted text-slate-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">{status}</span>;
 }
 
 function StatBox({ label, value, sub }: { label: string, value: string | number, sub?: string }) {
   return (
-    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center">
-      <div className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-2">{label}</div>
-      <div className="text-3xl font-black text-slate-900 tracking-tight">{value}</div>
+    <div className="bg-white p-5 rounded-xl border border-border shadow-sm flex flex-col justify-center">
+      <div className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mb-2">{label}</div>
+      <div className="text-3xl font-black text-foreground tracking-tight">{value}</div>
       {sub && <div className="text-xs font-medium text-indigo-600 mt-2 bg-indigo-50 inline-flex px-2 py-1 rounded-md self-start">{sub}</div>}
     </div>
   );
@@ -396,18 +396,18 @@ function EmailEditorSkeleton() {
         <div className="space-y-3">
           <div className="h-4 bg-slate-200 rounded w-32" />
           <div className="h-8 bg-slate-200 rounded w-64" />
-          <div className="h-4 bg-slate-100 rounded w-48" />
+          <div className="h-4 bg-muted rounded w-48" />
         </div>
       </div>
       <div className="flex flex-1 gap-6">
         <div className="w-1/2 flex flex-col gap-6">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
-            <div className="h-6 bg-slate-100 rounded w-48" />
-            {[1,2,3,4].map(i => <div key={i} className="h-12 bg-slate-50 rounded-xl" />)}
-            <div className="h-40 bg-slate-50 rounded-xl" />
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-6">
+            <div className="h-6 bg-muted rounded w-48" />
+            {[1,2,3,4].map(i => <div key={i} className="h-12 bg-muted rounded-xl" />)}
+            <div className="h-40 bg-muted rounded-xl" />
           </div>
         </div>
-        <div className="w-1/2 bg-slate-100 rounded-3xl border-4 border-slate-200" />
+        <div className="w-1/2 bg-muted rounded-3xl border-4 border-border" />
       </div>
     </div>
   );

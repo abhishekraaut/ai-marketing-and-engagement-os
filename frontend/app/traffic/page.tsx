@@ -42,23 +42,23 @@ export default function WebTrafficPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
-      <header className="flex justify-between items-center p-6 border-b border-slate-200 bg-white shadow-sm shrink-0">
+    <div className="flex flex-col h-full bg-muted overflow-hidden">
+      <header className="flex justify-between items-center p-6 border-b border-border bg-white shadow-sm shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Web Traffic Analytics</h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <h1 className="page-title">Web Traffic Analytics</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             Monitor traffic, behavior, and engagement across all your connected sites.
           </p>
         </div>
         <div className="flex space-x-3">
-          <button onClick={handleRefresh} disabled={isRefreshing} className="flex items-center space-x-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50">
+          <button onClick={handleRefresh} disabled={isRefreshing} className="flex items-center space-x-2 px-4 py-2 bg-white border border-border text-slate-700 rounded-lg hover:bg-muted transition-colors disabled:opacity-50">
             <RefreshCcw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
           <button 
             onClick={handleExport}
             disabled={isExporting}
-            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-70"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-70"
           >
             <Download className="w-4 h-4" />
             <span>{isExporting ? 'Exporting...' : 'Export Data (CSV)'}</span>
@@ -66,7 +66,7 @@ export default function WebTrafficPage() {
         </div>
       </header>
 
-      <div className="px-6 pt-4 shrink-0 bg-white border-b border-slate-200">
+      <div className="px-6 pt-4 shrink-0 bg-white border-b border-border">
         <div className="flex space-x-6">
           {[
             { id: 'umami', name: 'Umami (Privacy-focused)' },
@@ -80,7 +80,7 @@ export default function WebTrafficPage() {
               className={`pb-4 text-sm font-medium transition-colors relative ${
                 activeTab === tab.id
                   ? 'text-indigo-600'
-                  : 'text-slate-500 hover:text-slate-800'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {tab.name}
@@ -92,12 +92,12 @@ export default function WebTrafficPage() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-auto bg-slate-100 p-6">
-        <div className="h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+      <main className="flex-1 overflow-auto bg-muted p-6">
+        <div className="h-full bg-white rounded-xl shadow-sm border border-border overflow-hidden flex flex-col">
           {activeTab === 'umami' && (
             <div className="flex-1 w-full h-full relative">
               <div className="absolute top-2 right-2 flex space-x-2 z-10">
-                <a href={process.env.NEXT_PUBLIC_UMAMI_URL || "https://us.umami.is"} target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-slate-200 flex items-center space-x-1 text-xs font-medium">
+                <a href={process.env.NEXT_PUBLIC_UMAMI_URL || "https://us.umami.is"} target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-border flex items-center space-x-1 text-xs font-medium">
                   <ExternalLink className="w-3 h-3" />
                   <span>Open Umami App</span>
                 </a>
@@ -113,7 +113,7 @@ export default function WebTrafficPage() {
           {activeTab === 'matomo' && (
             <div className="flex-1 w-full h-full relative">
               <div className="absolute top-2 right-2 flex space-x-2 z-10">
-                <a href={process.env.NEXT_PUBLIC_MATOMO_URL || "https://matomo.org"} target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-slate-200 flex items-center space-x-1 text-xs font-medium">
+                <a href={process.env.NEXT_PUBLIC_MATOMO_URL || "https://matomo.org"} target="_blank" rel="noreferrer" className="bg-white/80 p-2 rounded-md shadow-sm hover:bg-white text-slate-600 border border-border flex items-center space-x-1 text-xs font-medium">
                   <ExternalLink className="w-3 h-3" />
                   <span>Open Matomo App</span>
                 </a>
@@ -131,30 +131,30 @@ export default function WebTrafficPage() {
               <div className="w-24 h-24 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
                 <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M4 11h4v11H4zM10 3h4v19h-4zM16 16h4v6h-4z"/></svg>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Google Analytics Integration Active</h2>
-              <p className="text-slate-500 max-w-md mb-8">
+              <h2 className="page-title mb-2">Google Analytics Integration Active</h2>
+              <p className="text-muted-foreground max-w-md mb-8">
                 Your tracking tag (G-XXXXXXXXXX) is successfully injected into the site. Real-time data is flowing to your Google Analytics property.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-8 text-left">
-                <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                  <p className="text-slate-500 text-sm font-medium mb-1">Active Users Right Now</p>
-                  <p className="text-3xl font-bold text-slate-800">124</p>
+                <div className="bg-muted p-6 rounded-xl border border-border">
+                  <p className="text-muted-foreground text-sm font-medium mb-1">Active Users Right Now</p>
+                  <p className="text-3xl font-bold text-foreground">124</p>
                   <p className="text-xs text-green-600 mt-2 font-medium flex items-center">
                     ↑ 12% vs last hour
                   </p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                  <p className="text-slate-500 text-sm font-medium mb-1">Top Page</p>
-                  <p className="text-xl font-bold text-slate-800 truncate">/campaigns/summer-sale</p>
-                  <p className="text-xs text-slate-500 mt-2 font-medium flex items-center">
+                <div className="bg-muted p-6 rounded-xl border border-border">
+                  <p className="text-muted-foreground text-sm font-medium mb-1">Top Page</p>
+                  <p className="text-xl font-bold text-foreground truncate">/campaigns/summer-sale</p>
+                  <p className="text-xs text-muted-foreground mt-2 font-medium flex items-center">
                     45 active viewers
                   </p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                  <p className="text-slate-500 text-sm font-medium mb-1">Top Source</p>
-                  <p className="text-xl font-bold text-slate-800">instagram.com</p>
-                  <p className="text-xs text-slate-500 mt-2 font-medium flex items-center">
+                <div className="bg-muted p-6 rounded-xl border border-border">
+                  <p className="text-muted-foreground text-sm font-medium mb-1">Top Source</p>
+                  <p className="text-xl font-bold text-foreground">instagram.com</p>
+                  <p className="text-xs text-muted-foreground mt-2 font-medium flex items-center">
                     Campaign tracking enabled
                   </p>
                 </div>
@@ -172,20 +172,20 @@ export default function WebTrafficPage() {
               <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Microsoft Clarity Heatmaps</h2>
-              <p className="text-slate-500 max-w-md mb-8">
+              <h2 className="page-title mb-2">Microsoft Clarity Heatmaps</h2>
+              <p className="text-muted-foreground max-w-md mb-8">
                 Session recording and heatmaps are currently active. Clarity is collecting click, scroll, and movement data for your project.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mb-8">
-                 <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 aspect-video flex items-center justify-center relative overflow-hidden group">
+                 <div className="bg-muted p-6 rounded-xl border border-border aspect-video flex items-center justify-center relative overflow-hidden group">
                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-red-500/20 mix-blend-multiply opacity-50 blur-xl"></div>
                    <div className="relative z-10 text-center">
                      <p className="font-semibold text-slate-700">Click Heatmaps</p>
-                     <p className="text-xs text-slate-500 mt-1">Capturing interaction hotspots</p>
+                     <p className="text-xs text-muted-foreground mt-1">Capturing interaction hotspots</p>
                    </div>
                  </div>
-                 <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 aspect-video flex items-center justify-center relative overflow-hidden">
+                 <div className="bg-muted p-6 rounded-xl border border-border aspect-video flex items-center justify-center relative overflow-hidden">
                    <div className="absolute inset-0 flex flex-col justify-between opacity-20">
                      <div className="w-full h-8 bg-red-500"></div>
                      <div className="w-full h-16 bg-yellow-500"></div>
@@ -194,7 +194,7 @@ export default function WebTrafficPage() {
                    </div>
                    <div className="relative z-10 text-center">
                      <p className="font-semibold text-slate-700">Scroll Depth</p>
-                     <p className="text-xs text-slate-500 mt-1">Tracking visitor engagement</p>
+                     <p className="text-xs text-muted-foreground mt-1">Tracking visitor engagement</p>
                    </div>
                  </div>
               </div>

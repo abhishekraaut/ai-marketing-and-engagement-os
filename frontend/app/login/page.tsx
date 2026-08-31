@@ -67,7 +67,7 @@ export default function LoginPage() {
             <h2 className="text-2xl font-bold text-white tracking-tight">
               Marketing OS
             </h2>
-            <p className="mt-1.5 text-sm text-slate-400">
+            <p className="mt-1.5 text-sm text-muted-foreground">
               Enter your credentials to access your workspace.
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-300 transition-colors"
+                  className="absolute inset-y-0 right-0 px-3 flex items-center text-muted-foreground hover:text-slate-300 transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -137,7 +137,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-8 pt-6 border-t border-slate-800">
-            <h3 className="text-sm font-medium text-slate-400 mb-4">Demo Credentials</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-4">Demo Credentials</h3>
             <div className="bg-slate-800/50 rounded-lg border border-slate-700/50 p-4 space-y-3">
               {[
                 { role: 'Admin', email: 'abhishek@aiagency.com' },
@@ -146,7 +146,7 @@ export default function LoginPage() {
               ].map((account) => (
                 <div key={account.role} className="flex justify-between items-center text-sm">
                   <span className="text-slate-300 font-medium">{account.role}</span>
-                  <span className="text-slate-400 font-mono text-xs">{account.email} / password123</span>
+                  <span className="text-muted-foreground font-mono text-xs">{account.email} / password123</span>
                 </div>
               ))}
             </div>

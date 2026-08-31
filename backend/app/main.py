@@ -13,6 +13,7 @@ from app.api.v1 import (
     email,
     trends,
     auth,
+    auth_meta,
     audiences,
     leads
 )
@@ -34,6 +35,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(auth_meta.router, prefix="/api/v1", tags=["auth_meta"])
 app.include_router(health.router, prefix="/api/v1/health", tags=["health"])
 app.include_router(organizations.router, prefix="/api/v1/organizations", tags=["organizations"])
 app.include_router(brand.router, prefix="/api/v1/organizations", tags=["brand"])

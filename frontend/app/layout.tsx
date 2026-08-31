@@ -77,7 +77,7 @@ export default function RootLayout({
         </Script>
       </head>
 
-      <body className={`${inter.className} bg-slate-50 text-slate-900 flex h-screen overflow-hidden`}>
+      <body className={`${inter.className} bg-muted text-foreground flex h-screen overflow-hidden`}>
         <Script id="meta-pixel" strategy="afterInteractive" dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)

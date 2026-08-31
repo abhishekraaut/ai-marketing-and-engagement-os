@@ -60,23 +60,23 @@ export default function AudiencesPage() {
     setIsModalOpen(true);
   };
 
-  if (!ORG_ID || isLoading) return <div className="p-8 animate-pulse bg-white h-96 rounded-xl border border-slate-200">Loading audiences...</div>;
+  if (!ORG_ID || isLoading) return <div className="p-8 animate-pulse bg-white h-96 rounded-xl border border-border">Loading audiences...</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="page-title flex items-center gap-2">
             <Users className="w-6 h-6 text-indigo-600" />
             Audience Management
           </h1>
-          <p className="text-slate-500 mt-1">Manage target audiences and segments for campaigns.</p>
+          <p className="page-description">Manage target audiences and segments for campaigns.</p>
         </div>
         
         <div className="flex items-center gap-3">
           <button 
             onClick={handleExport}
-            className="flex items-center gap-2 bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-white text-slate-700 border border-border px-4 py-2 rounded-lg text-sm font-semibold hover:bg-muted transition-colors shadow-sm"
           >
             <Download className="w-4 h-4" />
             Export CSV
@@ -84,7 +84,7 @@ export default function AudiencesPage() {
 
           <button 
             onClick={openNew}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-600/20"
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-hover transition-colors shadow-sm shadow-indigo-600/20"
           >
             <Plus className="w-4 h-4" />
             Add Audience
@@ -92,24 +92,25 @@ export default function AudiencesPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="min-w-full divide-y divide-slate-100">
-          <thead className="bg-slate-50">
+      <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="app-table-container">
+<table className="app-table">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Name</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Description</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Contacts</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase">Actions</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase">Name</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase">Description</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase">Contacts</th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {!audiences || audiences.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-slate-500">No audiences found.</td>
+                <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No audiences found.</td>
               </tr>
             ) : audiences.map((aud: Audience) => (
-              <tr key={aud.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{aud.name}</td>
+              <tr key={aud.id} className="hover:bg-muted/50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-foreground">{aud.name}</td>
                 <td className="px-6 py-4 text-sm text-slate-600">{aud.description || '-'}</td>
                 <td className="px-6 py-4 text-sm font-medium text-slate-600">{aud.contact_count}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
@@ -124,14 +125,15 @@ export default function AudiencesPage() {
             ))}
           </tbody>
         </table>
+</div>
       </div>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">{editingId ? 'Edit Audience' : 'New Audience'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">{editingId ? 'Edit Audience' : 'New Audience'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 text-muted-foreground hover:bg-muted rounded-full">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -156,14 +158,14 @@ export default function AudiencesPage() {
                 />
               </div>
             </div>
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">
+            <div className="p-6 bg-muted border-t border-border flex justify-end gap-3">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-foreground">
                 Cancel
               </button>
               <button 
                 onClick={() => saveMutation.mutate(formData)}
                 disabled={saveMutation.isPending || !formData.name}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-50 transition-colors"
               >
                 {saveMutation.isPending ? 'Saving...' : 'Save Audience'}
               </button>

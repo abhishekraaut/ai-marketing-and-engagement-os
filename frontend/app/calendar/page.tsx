@@ -43,34 +43,34 @@ export default function CalendarPage() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-[calc(100vh-6rem)]">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="page-title flex items-center gap-2">
             <CalendarIcon className="w-6 h-6 text-indigo-600" />
             Content Calendar
           </h1>
-          <p className="text-slate-500 mt-1">Manage and track your scheduled cross-channel campaigns.</p>
+          <p className="page-description">Manage and track your scheduled cross-channel campaigns.</p>
         </div>
         
-        <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-border shadow-sm">
           <button onClick={today} className="px-3 py-1.5 text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">
             Today
           </button>
           <div className="w-px h-6 bg-slate-200 mx-1" />
-          <button onClick={prevMonth} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
+          <button onClick={prevMonth} className="p-1.5 text-muted-foreground hover:text-slate-600 hover:bg-muted rounded-lg transition-all">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="w-32 text-center font-bold text-slate-900">
+          <span className="w-32 text-center font-bold text-foreground">
             {format(currentDate, 'MMMM yyyy')}
           </span>
-          <button onClick={nextMonth} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
+          <button onClick={nextMonth} className="p-1.5 text-muted-foreground hover:text-slate-600 hover:bg-muted rounded-lg transition-all">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden flex-1 flex flex-col min-h-0">
-        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 shrink-0">
+      <div className="bg-white rounded-xl shadow-sm border border-border/60 overflow-hidden flex-1 flex flex-col min-h-0">
+        <div className="grid grid-cols-7 border-b border-border bg-muted shrink-0">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 last:border-r-0">
+            <div key={day} className="py-3 text-center text-xs font-bold text-muted-foreground uppercase tracking-wider border-r border-border last:border-r-0">
               {day}
             </div>
           ))}
@@ -86,8 +86,8 @@ export default function CalendarPage() {
               <div 
                 key={day.toISOString()} 
                 className={cn(
-                  "min-h-[120px] p-2 border-b border-r border-slate-100 last:border-r-0 group transition-colors",
-                  !isCurrMonth && "bg-slate-50/50",
+                  "min-h-[120px] p-2 border-b border-r border-border last:border-r-0 group transition-colors",
+                  !isCurrMonth && "bg-muted/50",
                   isCurrDay && "bg-indigo-50/10",
                   (i + 1) % 7 === 0 && "border-r-0"
                 )}
@@ -96,13 +96,13 @@ export default function CalendarPage() {
                   <span className={cn(
                     "w-7 h-7 flex items-center justify-center rounded-full text-sm font-semibold",
                     isCurrDay ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200" : 
-                    !isCurrMonth ? "text-slate-400" : "text-slate-700 group-hover:bg-slate-100 transition-colors"
+                    !isCurrMonth ? "text-muted-foreground" : "text-slate-700 group-hover:bg-muted transition-colors"
                   )}>
                     {format(day, 'd')}
                   </span>
                 </div>
                 
-                <div className="space-y-1.5 overflow-y-auto max-h-[100px] scrollbar-hide">
+                <div className="space-y-1.5 overflow-y-auto max-h-[100px] app-scrollbar">
                   {dayEvents.map((evt: { id?: string | number, schedule_id?: string | number, date?: Date | string, platform?: string, content?: string, status?: string, time?: string, [key: string]: unknown }) => (
                     <div 
                       key={evt.schedule_id} 
@@ -110,7 +110,7 @@ export default function CalendarPage() {
                         "text-xs p-1.5 rounded-md border truncate cursor-pointer transition-colors hover:shadow-sm",
                         evt.status === 'PUBLISHED' ? "bg-emerald-50 border-emerald-100 text-emerald-800" :
                         evt.status === 'FAILED' ? "bg-red-50 border-red-100 text-red-800" :
-                        "bg-white border-slate-200 text-slate-700 hover:border-indigo-200"
+                        "bg-white border-border text-slate-700 hover:border-indigo-200"
                       )}
                       title={evt.content as string}
                     >
@@ -137,11 +137,11 @@ function CalendarSkeleton() {
         <div className="h-8 bg-slate-200 rounded w-48" />
         <div className="h-10 bg-slate-200 rounded-xl w-64" />
       </div>
-      <div className="bg-white rounded-xl border border-slate-200 flex-1 grid grid-cols-7 grid-rows-5 gap-0">
+      <div className="bg-white rounded-xl border border-border flex-1 grid grid-cols-7 grid-rows-5 gap-0">
         {Array.from({length: 35}).map((_, i) => (
-          <div key={i} className="border-r border-b border-slate-100 p-2 min-h-[120px]">
-            <div className="w-7 h-7 rounded-full bg-slate-100 mb-2" />
-            <div className="h-12 bg-slate-50 rounded" />
+          <div key={i} className="border-r border-b border-border p-2 min-h-[120px]">
+            <div className="w-7 h-7 rounded-full bg-muted mb-2" />
+            <div className="h-12 bg-muted rounded" />
           </div>
         ))}
       </div>

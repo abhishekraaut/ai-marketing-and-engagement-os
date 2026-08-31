@@ -67,37 +67,37 @@ export default function LeadsPage() {
     setIsModalOpen(true);
   };
 
-  if (!ORG_ID || isLoading) return <div className="p-8 animate-pulse bg-white h-[600px] rounded-xl border border-slate-200">Loading leads...</div>;
+  if (!ORG_ID || isLoading) return <div className="p-8 animate-pulse bg-white h-[600px] rounded-xl border border-border">Loading leads...</div>;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100vh-6rem)] flex flex-col">
       <div className="flex justify-between items-center shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="page-title flex items-center gap-2">
             <UserPlus className="w-6 h-6 text-indigo-600" />
             Lead Management
           </h1>
-          <p className="text-slate-500 mt-1">Track and move prospects through the conversion pipeline.</p>
+          <p className="page-description">Track and move prospects through the conversion pipeline.</p>
         </div>
         
         <button 
           onClick={openNew}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-600/20"
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-hover transition-colors shadow-sm shadow-indigo-600/20"
         >
           <Plus className="w-4 h-4" />
           Add Lead
         </button>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto pb-4 flex-1 items-start scrollbar-hide">
+      <div className="flex gap-6 overflow-x-auto app-scrollbar max-w-full pb-4 flex-1 items-start app-scrollbar">
         {COLUMNS.map((col) => {
           const colLeads = (leads || []).filter((l: Lead) => l.status === col);
           
           return (
-            <div key={col} className="bg-slate-100 rounded-xl min-w-[300px] w-[300px] flex flex-col max-h-full border border-slate-200/50 shadow-sm shrink-0">
-              <div className="p-3 border-b border-slate-200/60 flex items-center justify-between shrink-0 bg-slate-50 rounded-t-xl">
+            <div key={col} className="bg-muted rounded-xl min-w-[300px] w-[300px] flex flex-col max-h-full border border-border/50 shadow-sm shrink-0">
+              <div className="p-3 border-b border-border/60 flex items-center justify-between shrink-0 bg-muted rounded-t-xl">
                 <h3 className="font-bold text-slate-700 text-sm tracking-wide">{col.replace('_', ' ')}</h3>
-                <span className="text-xs font-semibold bg-white px-2 py-0.5 rounded-full text-slate-500 border shadow-sm">
+                <span className="text-xs font-semibold bg-white px-2 py-0.5 rounded-full text-muted-foreground border shadow-sm">
                   {colLeads.length}
                 </span>
               </div>
@@ -107,12 +107,12 @@ export default function LeadsPage() {
                   <div 
                     key={lead.id} 
                     onClick={() => openEdit(lead)}
-                    className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group relative"
+                    className="bg-white p-3.5 rounded-lg border border-border shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group relative"
                   >
-                    <div className="font-bold text-slate-900 text-sm mb-1">{lead.name}</div>
-                    <div className="text-xs text-slate-500 truncate mb-3">{lead.email || lead.phone || 'No contact info'}</div>
+                    <div className="font-bold text-foreground text-sm mb-1">{lead.name}</div>
+                    <div className="text-xs text-muted-foreground truncate mb-3">{lead.email || lead.phone || 'No contact info'}</div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">
+                      <span className="text-[10px] font-bold px-2 py-0.5 bg-muted text-slate-600 rounded">
                         {lead.source}
                       </span>
                       
@@ -132,7 +132,7 @@ export default function LeadsPage() {
                   </div>
                 ))}
                 {colLeads.length === 0 && (
-                  <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-sm font-medium">
+                  <div className="text-center py-6 border-2 border-dashed border-border rounded-lg text-muted-foreground text-sm font-medium">
                     No leads
                   </div>
                 )}
@@ -145,9 +145,9 @@ export default function LeadsPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">{editingId ? 'Edit Lead' : 'New Lead'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">{editingId ? 'Edit Lead' : 'New Lead'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 text-muted-foreground hover:bg-muted rounded-full">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -218,7 +218,7 @@ export default function LeadsPage() {
               </div>
             </div>
             
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-between gap-3">
+            <div className="p-6 bg-muted border-t border-border flex justify-between gap-3">
               {editingId ? (
                 <button 
                   onClick={() => { if(confirm('Delete lead?')) deleteMutation.mutate(editingId) }} 
@@ -229,13 +229,13 @@ export default function LeadsPage() {
               ) : <div></div>}
               
               <div className="flex gap-3">
-                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-foreground">
                   Cancel
                 </button>
                 <button 
                   onClick={() => saveMutation.mutate(formData)}
                   disabled={saveMutation.isPending || !formData.name}
-                  className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-50 transition-colors"
                 >
                   {saveMutation.isPending ? 'Saving...' : 'Save Lead'}
                 </button>

@@ -10,11 +10,20 @@ import { useToast } from '@/components/ui/ToastContext';
 
 const PLATFORMS = [
   { id: 'LINKEDIN', name: 'LinkedIn', icon: Briefcase, color: 'text-[#0077b5]', bg: 'bg-[#0077b5]/10', border: 'border-[#0077b5]/20', desc: 'Sync professional updates and B2B engagement.' },
-  { id: 'X', name: 'X (Twitter)', icon: Hash, color: 'text-slate-900', bg: 'bg-slate-100', border: 'border-slate-200', desc: 'Real-time brand mentions and public discourse.' },
+  { id: 'X', name: 'X (Twitter)', icon: Hash, color: 'text-foreground', bg: 'bg-muted', border: 'border-border', desc: 'Real-time brand mentions and public discourse.' },
   { id: 'INSTAGRAM', name: 'Instagram', icon: Camera, color: 'text-[#E1306C]', bg: 'bg-[#E1306C]/10', border: 'border-[#E1306C]/20', desc: 'Visual campaigns and influencer collaborations.' },
   { id: 'FACEBOOK', name: 'Facebook', icon: Users, color: 'text-[#1877F2]', bg: 'bg-[#1877F2]/10', border: 'border-[#1877F2]/20', desc: 'Community management and targeted ads.' },
   { id: 'YOUTUBE', name: 'YouTube', icon: MonitorPlay, color: 'text-[#FF0000]', bg: 'bg-[#FF0000]/10', border: 'border-[#FF0000]/20', desc: 'Video content and long-form engagement.' },
 ];
+
+
+declare global {
+  interface Window {
+    FB: {
+      login: (callback: (response: { authResponse?: { accessToken: string } }) => void, options?: { scope: string }) => void;
+    };
+  }
+}
 
 export default function SettingsPage() {
   const { currentOrgId: ORG_ID } = useAuth();
@@ -54,6 +63,47 @@ export default function SettingsPage() {
     }
   });
 
+  
+  const connectMetaMutation = useMutation({
+    mutationFn: (accessToken: string) => socialAccountsApi.connectMetaAccount(ORG_ID!, accessToken),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social-accounts', ORG_ID] });
+      toast({ 
+        title: 'Meta Accounts Connected', 
+        description: "Successfully authenticated pages.",
+        
+ 
+        type: 'success' 
+      });
+      setConnectModalOpen(false);
+      setAccountName('');
+      setSelectedPlatform(null);
+    }
+  });
+
+  const handleMetaLogin = () => {
+    // Check if FB SDK is loaded
+    if (typeof window !== 'undefined' && window.FB) {
+      window.FB.login(
+        (response: { authResponse?: { accessToken: string } }) => {
+          if (response.authResponse && response.authResponse.accessToken) {
+            connectMetaMutation.mutate(response.authResponse.accessToken);
+          } else {
+            toast({ title: 'Auth Cancelled', description: 'User cancelled login or did not fully authorize.', type: 'error' });
+          }
+        },
+        { scope: 'pages_manage_posts,pages_read_engagement,pages_messaging,pages_show_list,instagram_basic,instagram_content_publish,instagram_manage_comments,instagram_manage_messages' }
+      );
+    } else {
+      // Fallback to manually pasting a token
+      if (accountName) {
+        connectMetaMutation.mutate(accountName);
+      } else {
+        toast({ title: 'Token Required', description: 'Facebook SDK failed to load. Please paste a token to connect Meta accounts manually.', type: 'error' });
+      }
+    }
+  };
+
   const handleConnectClick = (platformId: string) => {
     setSelectedPlatform(platformId);
     setAccountName('');
@@ -70,11 +120,11 @@ export default function SettingsPage() {
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+        <h1 className="page-title flex items-center gap-2">
           <Settings className="w-6 h-6 text-indigo-600" />
           System Settings
         </h1>
-        <p className="text-slate-500 mt-1">Manage your organization preferences and social integrations.</p>
+        <p className="page-description">Manage your organization preferences and social integrations.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -88,21 +138,21 @@ export default function SettingsPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
           
-          <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-600 font-medium transition-all text-left">
-            <ShieldCheck className="w-5 h-5 text-slate-400" /> Security & Privacy
+          <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted border border-transparent hover:border-border text-slate-600 font-medium transition-all text-left">
+            <ShieldCheck className="w-5 h-5 text-muted-foreground" /> Security & Privacy
           </button>
           
-          <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-600 font-medium transition-all text-left">
-            <LogOut className="w-5 h-5 text-slate-400" /> Organization Danger Zone
+          <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted border border-transparent hover:border-border text-slate-600 font-medium transition-all text-left">
+            <LogOut className="w-5 h-5 text-muted-foreground" /> Organization Danger Zone
           </button>
         </div>
 
         {/* Right Column: Content */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-              <h2 className="text-lg font-bold text-slate-900">Connected Platforms</h2>
-              <p className="text-sm text-slate-500 mt-1">
+          <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="p-6 border-b border-border bg-muted/50">
+              <h2 className="text-lg font-bold text-foreground">Connected Platforms</h2>
+              <p className="text-sm text-muted-foreground mt-1">
                 Link your social media accounts to enable AI monitoring, engagement tracking, and automated publishing.
               </p>
             </div>
@@ -125,8 +175,8 @@ export default function SettingsPage() {
                     className={cn(
                       "flex flex-col sm:flex-row sm:items-center justify-between p-5 border-2 rounded-xl transition-all duration-200 group gap-4 sm:gap-0",
                       isConnected 
-                        ? "border-slate-200 bg-white" 
-                        : "border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white"
+                        ? "border-border bg-white" 
+                        : "border-border bg-muted/50 hover:border-border hover:bg-white"
                     )}
                   >
                     <div className="flex items-center gap-4">
@@ -134,7 +184,7 @@ export default function SettingsPage() {
                         <Icon className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-slate-900">{platform.name}</h3>
+                        <h3 className="font-bold text-foreground">{platform.name}</h3>
                         {isConnected ? (
                           <div className="flex items-center gap-1.5 mt-1 text-sm">
                             <span className="font-semibold text-slate-700">{account.account_name}</span>
@@ -144,7 +194,7 @@ export default function SettingsPage() {
                             </span>
                           </div>
                         ) : (
-                          <p className="text-sm text-slate-500 mt-0.5">{platform.desc}</p>
+                          <p className="text-sm text-muted-foreground mt-0.5">{platform.desc}</p>
                         )}
                       </div>
                     </div>
@@ -156,7 +206,7 @@ export default function SettingsPage() {
                         "px-6 py-2.5 text-sm font-bold rounded-xl transition-all w-full sm:w-auto shrink-0 flex items-center justify-center gap-2",
                         isConnected
                           ? "bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default"
-                          : "bg-white border-2 border-slate-200 text-slate-700 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50 shadow-sm"
+                          : "bg-white border-2 border-border text-slate-700 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50 shadow-sm"
                       )}
                     >
                       {isConnected ? (
@@ -178,42 +228,63 @@ export default function SettingsPage() {
       {connectModalOpen && selectedPlatform && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">
                 Connect {PLATFORMS.find(p => p.id === selectedPlatform)?.name}
               </h2>
-              <button onClick={() => setConnectModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full">
+              <button onClick={() => setConnectModalOpen(false)} className="p-2 text-muted-foreground hover:bg-muted rounded-full">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Account Name (Mock Authentication)</label>
-                <input 
-                  type="text" 
-                  value={accountName} 
-                  onChange={e => setAccountName(e.target.value)} 
-                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                  placeholder="e.g. MyBrand Official"
-                />
-                <p className="text-xs text-slate-500 mt-2">
-                  In a real scenario, this would redirect to the platform&apos;s OAuth flow.
-                </p>
+                {selectedPlatform === 'FACEBOOK' || selectedPlatform === 'INSTAGRAM' ? (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Meta OAuth Short-Lived Token</label>
+                    <input 
+                      type="text" 
+                      value={accountName} 
+                      onChange={e => setAccountName(e.target.value)} 
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      placeholder="Paste EAAC... token here or click Authorize"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Clicking &quot;Authorize App&quot; will open the real Facebook Login SDK. If the SDK fails to load, paste your Graph API Explorer token above.
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Account Name (Mock Authentication)</label>
+                    <input 
+                      type="text" 
+                      value={accountName} 
+                      onChange={e => setAccountName(e.target.value)} 
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      placeholder="e.g. MyBrand Official"
+                    />
+                  </div>
+                )}
               </div>
             </div>
             
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-              <button onClick={() => setConnectModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">
+            <div className="p-6 bg-muted border-t border-border flex justify-end gap-3">
+              <button onClick={() => setConnectModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-foreground">
                 Cancel
               </button>
               <button 
-                onClick={() => connectMutation.mutate(selectedPlatform)}
-                disabled={connectMutation.isPending || !accountName}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                onClick={() => {
+                  if (selectedPlatform === 'FACEBOOK' || selectedPlatform === 'INSTAGRAM') {
+                    handleMetaLogin();
+                  } else {
+                    connectMutation.mutate(selectedPlatform);
+                  }
+                }}
+                disabled={connectMutation.isPending || connectMetaMutation.isPending || (!accountName && selectedPlatform !== 'FACEBOOK' && selectedPlatform !== 'INSTAGRAM')}
+                className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover disabled:opacity-50 transition-colors flex items-center gap-2"
               >
-                {connectMutation.isPending && <RefreshCcw className="w-4 h-4 animate-spin" />}
-                {connectMutation.isPending ? 'Connecting...' : 'Authorize App'}
+                {(connectMutation.isPending || connectMetaMutation.isPending) && <RefreshCcw className="w-4 h-4 animate-spin" />}
+                {connectMutation.isPending || connectMetaMutation.isPending ? 'Connecting...' : 'Authorize App'}
               </button>
             </div>
           </div>
@@ -228,17 +299,17 @@ function SettingsSkeleton() {
     <div className="max-w-5xl mx-auto space-y-8 animate-pulse">
       <div>
         <div className="h-8 bg-slate-200 rounded w-48 mb-2" />
-        <div className="h-4 bg-slate-100 rounded w-96" />
+        <div className="h-4 bg-muted rounded w-96" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-2">
-          {[1,2,3].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl" />)}
+          {[1,2,3].map(i => <div key={i} className="h-12 bg-muted rounded-xl" />)}
         </div>
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50 h-24" />
+          <div className="bg-white rounded-2xl border border-border overflow-hidden">
+            <div className="p-6 border-b border-border bg-muted h-24" />
             <div className="p-6 space-y-4">
-              {[1,2,3,4].map(i => <div key={i} className="h-24 bg-slate-50 border-2 border-slate-100 rounded-xl" />)}
+              {[1,2,3,4].map(i => <div key={i} className="h-24 bg-muted border-2 border-border rounded-xl" />)}
             </div>
           </div>
         </div>

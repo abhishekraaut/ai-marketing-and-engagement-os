@@ -62,7 +62,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             {t.type === 'info' && <Info className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />}
             
             <div className="flex-1">
-              <h4 className={cn("text-sm font-semibold", t.type === 'info' ? 'text-white' : 'text-slate-900')}>{t.title}</h4>
+              <h4 className={cn("text-sm font-semibold", t.type === 'info' ? 'text-white' : 'text-foreground')}>{t.title}</h4>
               {t.description && (
                 <p className={cn("text-sm mt-1", t.type === 'info' ? 'text-slate-300' : 'text-slate-500')}>{t.description}</p>
               )}

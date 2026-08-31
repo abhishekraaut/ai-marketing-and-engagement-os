@@ -103,21 +103,21 @@ export default function AnalyticsPage() {
       {/* Header & Filters */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="page-title flex items-center gap-2">
             <ChartNoAxesColumn className="w-6 h-6 text-indigo-600" />
             Analytics Intelligence
           </h1>
-          <p className="text-slate-500 mt-1">Deep dive into your cross-channel marketing performance.</p>
+          <p className="page-description">Deep dive into your cross-channel marketing performance.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl border border-slate-200 shadow-sm w-full xl:w-auto">
-          <div className="flex items-center pl-2 text-slate-400">
+        <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl border border-border shadow-sm w-full xl:w-auto">
+          <div className="flex items-center pl-2 text-muted-foreground">
             <Filter className="w-4 h-4" />
           </div>
           <select 
             value={dateFilter} 
             onChange={(e) => setDateFilter(e.target.value)}
-            className="bg-slate-50 border-0 rounded-lg text-sm font-medium text-slate-700 py-2 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="bg-muted border-0 rounded-lg text-sm font-medium text-slate-700 py-2 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
           <select 
             value={platformFilter} 
             onChange={(e) => setPlatformFilter(e.target.value)}
-            className="bg-slate-50 border-0 rounded-lg text-sm font-medium text-slate-700 py-2 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="bg-muted border-0 rounded-lg text-sm font-medium text-slate-700 py-2 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
             <option value="ALL">All Platforms</option>
             <option value="LINKEDIN">LinkedIn</option>
@@ -141,7 +141,7 @@ export default function AnalyticsPage() {
 
           <button 
             onClick={handleExport}
-            className="flex items-center gap-2 bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm ml-auto xl:ml-0"
+            className="flex items-center gap-2 bg-white text-slate-700 border border-border px-4 py-2 rounded-lg text-sm font-semibold hover:bg-muted transition-colors shadow-sm ml-auto xl:ml-0"
           >
             <Download className="w-4 h-4" />
             Export CSV
@@ -159,16 +159,16 @@ export default function AnalyticsPage() {
       </div>
 
       {overview?.posts_published === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+        <div className="bg-white rounded-xl shadow-sm border border-border p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
             <ChartNoAxesColumn className="w-8 h-8 text-slate-300" />
           </div>
-          <h3 className="text-xl font-bold text-slate-900 mb-2">No data available</h3>
-          <p className="text-slate-500 mb-8 max-w-md">You haven&apos;t published any posts yet. Publish content and sync analytics to start building your dashboard.</p>
+          <h3 className="text-xl font-bold text-foreground mb-2">No data available</h3>
+          <p className="text-muted-foreground mb-8 max-w-md">You haven&apos;t published any posts yet. Publish content and sync analytics to start building your dashboard.</p>
           <button 
             onClick={() => syncMutation.mutate()} 
             disabled={syncMutation.isPending}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-hover transition-colors shadow-sm"
           >
             <RefreshCcw className={cn("w-4 h-4", syncMutation.isPending && "animate-spin")} />
             Sync Now
@@ -188,8 +188,8 @@ export default function AnalyticsPage() {
 
           {/* Charts Row 1 */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
-              <h2 className="text-lg font-bold text-slate-900 mb-6">Engagement Trends</h2>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-border lg:col-span-2">
+              <h2 className="text-lg font-bold text-foreground mb-6">Engagement Trends</h2>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trends}>
@@ -207,8 +207,8 @@ export default function AnalyticsPage() {
               </div>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-900 mb-6">Platform Distribution</h2>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-border">
+              <h2 className="text-lg font-bold text-foreground mb-6">Platform Distribution</h2>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={platforms} layout="vertical" margin={{ left: 20 }}>
@@ -230,27 +230,28 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             
             {/* Top Content */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 xl:col-span-2 overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-900">Top Performing Content</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-border xl:col-span-2 overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-border flex items-center justify-between">
+                <h2 className="text-lg font-bold text-foreground">Top Performing Content</h2>
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-100">
-                  <thead className="bg-slate-50">
+              <div className="overflow-x-auto app-scrollbar max-w-full">
+                <div className="app-table-container">
+<table className="app-table">
+                  <thead className="bg-muted">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Platform</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Content</th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Engagements</th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Rate</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Platform</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Content</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Engagements</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rate</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {topContent?.map((item: PlatformMetric, i: number) => (
-                      <tr key={i} onClick={() => setSelectedPostId(item.published_post_id || null)} className="hover:bg-slate-50/50 transition-colors cursor-pointer">
+                      <tr key={i} onClick={() => setSelectedPostId(item.published_post_id || null)} className="hover:bg-muted/50 transition-colors cursor-pointer">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700">{item.platform}</td>
                         <td className="px-6 py-4 text-sm">
-                          <div className="font-semibold text-slate-900 mb-1 line-clamp-1">{item.title}</div>
-                          <div className="text-slate-500 line-clamp-1">{item.content_preview}</div>
+                          <div className="font-semibold text-foreground mb-1 line-clamp-1">{item.title}</div>
+                          <div className="text-muted-foreground line-clamp-1">{item.content_preview}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700">
@@ -264,6 +265,7 @@ export default function AnalyticsPage() {
                     ))}
                   </tbody>
                 </table>
+</div>
               </div>
             </div>
 
@@ -273,32 +275,32 @@ export default function AnalyticsPage() {
                 <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                <h2 className="text-lg font-bold text-slate-900">AI Analysis</h2>
+                <h2 className="text-lg font-bold text-foreground">AI Analysis</h2>
               </div>
               
-              <div className="space-y-4 flex-1 overflow-y-auto pr-2 scrollbar-hide">
+              <div className="space-y-4 flex-1 overflow-y-auto pr-2 app-scrollbar">
                 {(!recommendations || recommendations.length === 0) ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    <p className="text-slate-500 text-sm">Not enough data to generate insights.</p>
+                    <p className="text-muted-foreground text-sm">Not enough data to generate insights.</p>
                   </div>
                 ) : (
                   recommendations.map((rec: { insight?: string; title?: string; recommendation?: string; priority?: string; reason?: string; category?: string; }, idx: number) => (
-                    <div key={idx} className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div key={idx} className="bg-white rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                       <div className={cn(
                         "absolute top-0 left-0 w-1 h-full",
                         rec.priority === 'HIGH' ? "bg-amber-400" : "bg-indigo-400"
                       )} />
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="font-bold text-slate-900 text-sm leading-tight">{rec.title}</h3>
+                        <h3 className="font-bold text-foreground text-sm leading-tight">{rec.title}</h3>
                         <span className={cn(
                           "text-[10px] font-extrabold px-2 py-1 rounded tracking-widest",
-                          rec.priority === 'HIGH' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                          rec.priority === 'HIGH' ? 'bg-amber-100 text-amber-800' : 'bg-muted text-slate-600'
                         )}>
                           {rec.priority}
                         </span>
                       </div>
                       <p className="text-sm text-slate-600 mb-3">{rec.recommendation}</p>
-                      <div className="bg-slate-50 rounded-lg p-3 text-xs text-slate-500">
+                      <div className="bg-muted rounded-lg p-3 text-xs text-muted-foreground">
                         <strong className="text-slate-700">Insight:</strong> {rec.reason}
                       </div>
                     </div>
@@ -314,9 +316,9 @@ export default function AnalyticsPage() {
       {selectedPostId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white">
-              <h2 className="text-xl font-bold text-slate-900">Post Performance</h2>
-              <button onClick={() => setSelectedPostId(null)} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
+            <div className="p-6 border-b border-border flex items-center justify-between sticky top-0 bg-white">
+              <h2 className="text-xl font-bold text-foreground">Post Performance</h2>
+              <button onClick={() => setSelectedPostId(null)} className="px-3 py-1 bg-white border border-border rounded-lg text-sm font-semibold hover:bg-muted transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -324,56 +326,56 @@ export default function AnalyticsPage() {
             <div className="p-6 overflow-y-auto">
               {isPostDetailLoading ? (
                 <div className="animate-pulse space-y-4">
-                  <div className="h-24 bg-slate-100 rounded-xl"></div>
-                  <div className="h-24 bg-slate-100 rounded-xl"></div>
+                  <div className="h-24 bg-muted rounded-xl"></div>
+                  <div className="h-24 bg-muted rounded-xl"></div>
                 </div>
               ) : postDetail ? (
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <div className="text-xs font-bold text-slate-500 uppercase">Platform</div>
-                      <div className="text-lg font-black text-slate-900 mt-1">{postDetail.platform}</div>
+                    <div className="bg-muted p-4 rounded-xl border border-border">
+                      <div className="text-xs font-bold text-muted-foreground uppercase">Platform</div>
+                      <div className="text-lg font-black text-foreground mt-1">{postDetail.platform}</div>
                     </div>
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <div className="text-xs font-bold text-slate-500 uppercase">Impressions</div>
-                      <div className="text-lg font-black text-slate-900 mt-1">{postDetail.impressions.toLocaleString()}</div>
+                    <div className="bg-muted p-4 rounded-xl border border-border">
+                      <div className="text-xs font-bold text-muted-foreground uppercase">Impressions</div>
+                      <div className="text-lg font-black text-foreground mt-1">{postDetail.impressions.toLocaleString()}</div>
                     </div>
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <div className="text-xs font-bold text-slate-500 uppercase">Reach</div>
-                      <div className="text-lg font-black text-slate-900 mt-1">{postDetail.reach.toLocaleString()}</div>
+                    <div className="bg-muted p-4 rounded-xl border border-border">
+                      <div className="text-xs font-bold text-muted-foreground uppercase">Reach</div>
+                      <div className="text-lg font-black text-foreground mt-1">{postDetail.reach.toLocaleString()}</div>
                     </div>
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <div className="text-xs font-bold text-slate-500 uppercase">Eng. Rate</div>
-                      <div className="text-lg font-black text-slate-900 mt-1">{postDetail.conversion_rate}%</div>
+                    <div className="bg-muted p-4 rounded-xl border border-border">
+                      <div className="text-xs font-bold text-muted-foreground uppercase">Eng. Rate</div>
+                      <div className="text-lg font-black text-foreground mt-1">{postDetail.conversion_rate}%</div>
                     </div>
                   </div>
                   
-                  <h3 className="font-bold text-slate-900">Engagement Breakdown</h3>
+                  <h3 className="font-bold text-foreground">Engagement Breakdown</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="flex justify-between items-center p-3 border-b border-slate-100">
+                    <div className="flex justify-between items-center p-3 border-b border-border">
                       <span className="text-slate-600 font-medium">Likes</span>
-                      <span className="font-bold text-slate-900">{postDetail.likes.toLocaleString()}</span>
+                      <span className="font-bold text-foreground">{postDetail.likes.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 border-b border-slate-100">
+                    <div className="flex justify-between items-center p-3 border-b border-border">
                       <span className="text-slate-600 font-medium">Comments</span>
-                      <span className="font-bold text-slate-900">{postDetail.comments.toLocaleString()}</span>
+                      <span className="font-bold text-foreground">{postDetail.comments.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 border-b border-slate-100">
+                    <div className="flex justify-between items-center p-3 border-b border-border">
                       <span className="text-slate-600 font-medium">Shares</span>
-                      <span className="font-bold text-slate-900">{postDetail.shares.toLocaleString()}</span>
+                      <span className="font-bold text-foreground">{postDetail.shares.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 border-b border-slate-100">
+                    <div className="flex justify-between items-center p-3 border-b border-border">
                       <span className="text-slate-600 font-medium">URL Clicks</span>
-                      <span className="font-bold text-slate-900">{postDetail.url_clicks.toLocaleString()}</span>
+                      <span className="font-bold text-foreground">{postDetail.url_clicks.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 border-b border-slate-100">
+                    <div className="flex justify-between items-center p-3 border-b border-border">
                       <span className="text-slate-600 font-medium">Followers Gained</span>
                       <span className="font-bold text-emerald-600">+{postDetail.followers?.toLocaleString() || 0}</span>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-slate-500 p-8">No detailed data found for this post.</div>
+                <div className="text-center text-muted-foreground p-8">No detailed data found for this post.</div>
               )}
             </div>
             
@@ -387,13 +389,13 @@ export default function AnalyticsPage() {
  
 function KpiCard({ title, value, icon: Icon, trend, positive }: { title: string, value: string | number | undefined, icon: React.ElementType, trend?: string, positive?: boolean }) {
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 group hover:border-indigo-200 transition-colors">
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-border group hover:border-indigo-200 transition-colors">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{title}</h3>
-        <Icon className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</h3>
+        <Icon className="w-4 h-4 text-muted-foreground group-hover:text-indigo-500 transition-colors" />
       </div>
       <div className="flex items-baseline gap-2">
-        <div className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">{value ?? '-'}</div>
+        <div className="text-2xl lg:text-3xl font-black text-foreground tracking-tight">{value ?? '-'}</div>
         {trend && (
           <span className={cn(
             "text-xs font-bold px-1.5 py-0.5 rounded",
@@ -415,11 +417,11 @@ function AnalyticsSkeleton() {
         <div className="h-10 bg-slate-200 rounded w-64" />
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        {[1,2,3,4,5,6].map(i => <div key={i} className="h-28 bg-white rounded-xl border border-slate-200" />)}
+        {[1,2,3,4,5,6].map(i => <div key={i} className="h-28 bg-white rounded-xl border border-border" />)}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 h-96 bg-white rounded-xl border border-slate-200" />
-        <div className="h-96 bg-white rounded-xl border border-slate-200" />
+        <div className="lg:col-span-2 h-96 bg-white rounded-xl border border-border" />
+        <div className="h-96 bg-white rounded-xl border border-border" />
       </div>
     </div>
   );

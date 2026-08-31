@@ -87,20 +87,20 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="page-title">
             Welcome back, {user?.name?.split(' ')[0] || 'User'}
           </h1>
-          <p className="text-slate-500 mt-1">Here&apos;s what&apos;s happening across your workspace today.</p>
+          <p className="page-description">Here&apos;s what&apos;s happening across your workspace today.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm hidden sm:flex">
-            <div className="flex items-center pl-2 text-slate-400">
+          <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-border shadow-sm hidden sm:flex">
+            <div className="flex items-center pl-2 text-muted-foreground">
               <Filter className="w-4 h-4" />
             </div>
             <select 
               value={dateFilter} 
               onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-slate-50 border-0 rounded-lg text-sm font-medium text-slate-700 py-1.5 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="bg-muted border-0 rounded-lg text-sm font-medium text-slate-700 py-1.5 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
               <option value="7">Last 7 days</option>
               <option value="30">Last 30 days</option>
@@ -111,7 +111,7 @@ export default function Dashboard() {
             <select 
               value={platformFilter} 
               onChange={(e) => setPlatformFilter(e.target.value)}
-              className="bg-slate-50 border-0 rounded-lg text-sm font-medium text-slate-700 py-1.5 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="bg-muted border-0 rounded-lg text-sm font-medium text-slate-700 py-1.5 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
               <option value="ALL">All Platforms</option>
               <option value="LINKEDIN">LinkedIn</option>
@@ -130,7 +130,7 @@ export default function Dashboard() {
                 toast({ title: 'Export failed', description: ((error as Error).message || "Error") || 'Could not export data.', type: 'error' });
               }
             }}
-            className="inline-flex items-center gap-2 bg-white text-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-white text-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium border border-border hover:bg-muted transition-colors shadow-sm"
           >
             <Download className="w-4 h-4" />
             Export Data
@@ -150,12 +150,12 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <MetricCard 
           label="Total Reach" 
-          value={overviewLoading ? null : (overview?.total_reach?.toLocaleString() || 0)} 
+          value={overviewLoading ? null : (overview?.reach?.toLocaleString() || 0)} 
           icon={Users}
         />
         <MetricCard 
           label="Avg Engagement" 
-          value={overviewLoading ? null : `${(overview?.avg_engagement_rate * 100 || 0).toFixed(1)}%`} 
+          value={overviewLoading ? null : `${(overview?.engagement_rate * 100 || 0).toFixed(1)}%`} 
           icon={Activity}
         />
         <MetricCard 
@@ -176,10 +176,10 @@ export default function Dashboard() {
         {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-8">
           {/* AI Insights & Recommendations */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden relative">
+          <div className="bg-white rounded-xl shadow-sm border border-border/60 overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
             <div className="p-6">
-              <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-indigo-600" />
                 </div>
@@ -189,7 +189,7 @@ export default function Dashboard() {
               {recLoading ? (
                 <div className="space-y-4">
                   {[1, 2].map(i => (
-                    <div key={i} className="animate-pulse bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3">
+                    <div key={i} className="animate-pulse bg-muted p-4 rounded-lg border border-border space-y-3">
                       <div className="h-4 bg-slate-200 rounded w-1/3" />
                       <div className="h-3 bg-slate-200 rounded w-full" />
                       <div className="h-3 bg-slate-200 rounded w-5/6" />
@@ -202,7 +202,7 @@ export default function Dashboard() {
                     <div key={idx} className="group bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100 p-5 rounded-xl hover:shadow-md transition-all duration-300">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-semibold text-slate-900 mb-2">{rec.insight || rec.title}</h3>
+                          <h3 className="font-semibold text-foreground mb-2">{rec.insight || rec.title}</h3>
                           <p className="text-slate-600 text-sm leading-relaxed">{rec.recommendation}</p>
                         </div>
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 tracking-wide uppercase">
@@ -213,7 +213,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-slate-500 text-sm py-8 text-center bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                <div className="text-muted-foreground text-sm py-8 text-center bg-muted rounded-lg border border-dashed border-border">
                   No insights available right now. Generate more content to feed the AI!
                 </div>
               )}
@@ -223,13 +223,13 @@ export default function Dashboard() {
 
         {/* Sidebar */}
         <div className="space-y-8">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-slate-400" />
+          <div className="bg-white rounded-xl shadow-sm border border-border/60 p-6">
+            <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-muted-foreground" />
               Recent Activity
             </h2>
             
-            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[11px] before:h-full before:w-[2px] before:bg-slate-100">
+            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[11px] before:h-full before:w-[2px] before:bg-muted">
               {(engLoading || emlLoading) ? (
                 [1,2,3].map(i => (
                   <div key={i} className="relative flex items-start gap-4">
@@ -248,18 +248,18 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1 pt-0.5">
                       <div className="flex items-center justify-between mb-1">
-                        <Link href={item.link} className="font-medium text-slate-800 text-sm hover:text-indigo-600 transition-colors">
+                        <Link href={item.link} className="font-medium text-foreground text-sm hover:text-indigo-600 transition-colors">
                           {item.title}
                         </Link>
                       </div>
-                      <time className="text-xs text-slate-500">
+                      <time className="text-xs text-muted-foreground">
                         {item.time.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </time>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-slate-500 text-sm text-center relative z-10 bg-white py-2">
+                <div className="text-muted-foreground text-sm text-center relative z-10 bg-white py-2">
                   No recent activity.
                 </div>
               )}
@@ -293,14 +293,14 @@ export default function Dashboard() {
 function MetricCard({ label, value, icon: Icon, alert = false }: { label: string, value: string | number | null, icon: React.ElementType, alert?: boolean }) {
   return (
     <div className={cn(
-      "bg-white rounded-xl p-6 border shadow-sm transition-all duration-300 hover:shadow-md",
-      alert ? "border-amber-200 bg-amber-50/30" : "border-slate-200/60"
+      "app-card p-6 transition-all duration-300 hover:shadow-md",
+      alert ? "border-amber-200 bg-amber-50/30" : "border-border/60"
     )}>
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-sm font-medium text-slate-500">{label}</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">{label}</h3>
         <div className={cn(
           "p-2 rounded-lg",
-          alert ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-600"
+          alert ? "bg-amber-100 text-amber-600" : "bg-muted text-slate-600"
         )}>
           <Icon className="w-4 h-4" />
         </div>
@@ -309,7 +309,7 @@ function MetricCard({ label, value, icon: Icon, alert = false }: { label: string
         {value === null ? (
           <div className="h-8 bg-slate-200 rounded w-16 animate-pulse" />
         ) : (
-          <div className={cn("text-3xl font-bold tracking-tight", alert ? "text-amber-700" : "text-slate-900")}>
+          <div className={cn("text-3xl font-bold tracking-tight", alert ? "text-amber-700" : "text-foreground")}>
             {value}
           </div>
         )}
@@ -324,10 +324,10 @@ function DashboardSkeleton() {
       <div className="h-8 bg-slate-200 rounded w-1/4"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[1,2,3,4].map(i => (
-          <div key={i} className="bg-white rounded-xl p-6 border border-slate-200 h-32" />
+          <div key={i} className="bg-white rounded-xl p-6 border border-border h-32" />
         ))}
       </div>
-      <div className="h-96 bg-white rounded-xl border border-slate-200" />
+      <div className="h-96 bg-white rounded-xl border border-border" />
     </div>
   );
 }

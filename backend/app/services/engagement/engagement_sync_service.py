@@ -17,7 +17,7 @@ class EngagementSyncService:
             
             for post in posts:
                 from app.services.connectors.factory import get_connector
-                connector = get_connector(post.social_account.platform.value)
+                connector = get_connector(post.social_account.platform.value, access_token=post.social_account.access_token_encrypted, external_account_id=post.social_account.external_account_id)
                 comments = connector.get_comments(post.external_post_id)
                 for comment in comments:
                     ext_id = comment["external_engagement_id"]

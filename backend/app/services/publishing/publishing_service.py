@@ -8,6 +8,13 @@ from app.services.connectors.mock.mock_connector import mock_connector
 
 logger = logging.getLogger(__name__)
 
+
+class PublishRetryException(Exception):
+    def __init__(self, retry_in: int, meta_payload: dict):
+        self.retry_in = retry_in
+        self.meta_payload = meta_payload
+        super().__init__(f"Retrying in {retry_in}s")
+
 class PublishingService:
     def _log_audit(self, db: Session, org_id: int, action: str, entity_type: str, entity_id: int, metadata: dict = None):
         log = AuditLog(
@@ -19,7 +26,7 @@ class PublishingService:
         )
         db.add(log)
 
-    def publish_scheduled_post(self, schedule_id: int):
+    def publish_scheduled_post(self, schedule_id: int, meta_payload: dict = None):
         """
         Executes a schedule, calling the connector, ensuring idempotency.
         This is intended to be called from a Celery worker.
@@ -69,7 +76,7 @@ class PublishingService:
             
             
             from app.services.connectors.factory import get_connector
-            connector = get_connector(account.platform.value)
+            connector = get_connector(account.platform.value, access_token=account.access_token_encrypted, external_account_id=account.external_account_id)
             
             # Append hashtags to the content
             final_content = variant.content or ""
@@ -85,7 +92,8 @@ class PublishingService:
             connector_res = connector.publish_post(
                 content=final_content,
                 media_urls=variant.media_urls,
-                account_name=account.account_name if account.account_name != "ERROR" else "ERROR"
+                account_name=account.account_name if account.account_name != "ERROR" else "ERROR",
+                meta_payload=meta_payload
             )
 
             if connector_res.get("success"):

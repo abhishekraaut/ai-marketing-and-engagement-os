@@ -157,7 +157,7 @@ export default function CampaignsPage() {
       case 'IN_REVIEW': return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">IN REVIEW</span>;
       case 'SCHEDULED': return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 border border-blue-200">SCHEDULED</span>;
       case 'REJECTED': return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-100 text-rose-800 border border-rose-200">REJECTED</span>;
-      default: return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">DRAFT</span>;
+      default: return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-muted text-slate-700 border border-border">DRAFT</span>;
     }
   };
 
@@ -165,26 +165,26 @@ export default function CampaignsPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="page-title flex items-center gap-3">
             <Megaphone className="w-8 h-8 text-indigo-600" />
             Campaigns
           </h1>
-          <p className="text-slate-500 mt-1 text-lg">Manage multi-platform marketing campaigns seamlessly.</p>
+          <p className="text-muted-foreground mt-1 text-lg">Manage multi-platform marketing campaigns seamlessly.</p>
         </div>
         {!isCreating && !selectedCampaign && (
-          <button onClick={() => { setIsCreating(true); setSaveStatus('idle'); }} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg shadow-md shadow-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all">
+          <button onClick={() => { setIsCreating(true); setSaveStatus('idle'); }} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg shadow-md shadow-indigo-200 hover:bg-primary-hover hover:shadow-lg transition-all">
             <Plus className="w-4 h-4" /> Create Campaign
           </button>
         )}
       </div>
 
       {isCreating && (
-        <form onSubmit={(e) => { e.preventDefault(); createMutation.mutate(formData); }} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <form onSubmit={(e) => { e.preventDefault(); createMutation.mutate(formData); }} className="bg-white p-8 rounded-2xl shadow-sm border border-border space-y-6">
+          <div className="flex items-center gap-3 border-b border-border pb-4">
             <div className="p-2 bg-indigo-50 rounded-lg"><Layers className="w-5 h-5 text-indigo-600" /></div>
-            <h2 className="text-xl font-bold text-slate-800">New Campaign Setup</h2>
+            <h2 className="text-xl font-bold text-foreground">New Campaign Setup</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
@@ -201,9 +201,9 @@ export default function CampaignsPage() {
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4 pt-4 border-t border-slate-100">
-            <button type="button" onClick={() => setIsCreating(false)} className="px-5 py-2.5 text-slate-700 font-medium hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
-            <button type="submit" disabled={saveStatus === 'saving' || saveStatus === 'saved'} className="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all disabled:opacity-70 flex items-center gap-2 min-w-[150px] justify-center">
+          <div className="flex justify-end space-x-4 pt-4 border-t border-border">
+            <button type="button" onClick={() => setIsCreating(false)} className="px-5 py-2.5 text-slate-700 font-medium hover:bg-muted rounded-lg transition-colors">Cancel</button>
+            <button type="submit" disabled={saveStatus === 'saving' || saveStatus === 'saved'} className="px-6 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-hover hover:shadow-lg transition-all disabled:opacity-70 flex items-center gap-2 min-w-[150px] justify-center">
               {saveStatus === 'saving' ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : saveStatus === 'saved' ? <><CheckCircle className="w-4 h-4" /> Created</> : 'Create Campaign'}
             </button>
           </div>
@@ -212,30 +212,30 @@ export default function CampaignsPage() {
 
       {selectedCampaign && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-border animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-100 rounded-lg"><Sparkles className="w-5 h-5 text-indigo-700" /></div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">Content Studio</h2>
-                  <p className="text-sm text-slate-500">Campaign: <span className="font-semibold text-slate-700">{selectedCampaign.name}</span></p>
+                  <h2 className="text-xl font-bold text-foreground">Content Studio</h2>
+                  <p className="text-sm text-muted-foreground">Campaign: <span className="font-semibold text-slate-700">{selectedCampaign.name}</span></p>
                 </div>
               </div>
-              <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); setSelectedTrends([]); }} className="text-slate-400 hover:text-slate-700 hover:bg-slate-200 p-2 rounded-full transition-colors"><XCircle className="w-6 h-6" /></button>
+              <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); setSelectedTrends([]); }} className="text-muted-foreground hover:text-slate-700 hover:bg-slate-200 p-2 rounded-full transition-colors"><XCircle className="w-6 h-6" /></button>
             </div>
 
-            <div className="p-6 flex-1 overflow-y-auto bg-slate-50/30">
+            <div className="p-6 flex-1 overflow-y-auto bg-muted/30">
               {!generatedContent && !generateMutation.isPending && (
                 <div className="max-w-2xl mx-auto py-12 text-center space-y-8">
                   <div>
-                    <h3 className="text-2xl font-bold text-slate-800 mb-2">Select Target Platforms</h3>
-                    <p className="text-slate-500">Choose where you want to generate tailored content for this campaign.</p>
+                    <h3 className="page-title mb-2">Select Target Platforms</h3>
+                    <p className="text-muted-foreground">Choose where you want to generate tailored content for this campaign.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     {AVAILABLE_PLATFORMS.map(platform => (
-                      <label key={platform} className={`flex items-center justify-between p-4 border-2 rounded-xl cursor-pointer transition-all ${selectedPlatforms.includes(platform) ? 'border-indigo-600 bg-indigo-50/50 shadow-sm' : 'border-slate-200 hover:border-indigo-300 bg-white'}`}>
+                      <label key={platform} className={`flex items-center justify-between p-4 border-2 rounded-xl cursor-pointer transition-all ${selectedPlatforms.includes(platform) ? 'border-indigo-600 bg-indigo-50/50 shadow-sm' : 'border-border hover:border-indigo-300 bg-white'}`}>
                         <div className="flex items-center gap-3">
-                          <Layout className={`w-5 h-5 ${selectedPlatforms.includes(platform) ? 'text-indigo-600' : 'text-slate-400'}`} />
+                          <Layout className={`w-5 h-5 ${selectedPlatforms.includes(platform) ? 'text-indigo-600' : 'text-muted-foreground'}`} />
                           <span className="font-bold text-slate-700">{platform}</span>
                         </div>
                         <input type="checkbox" checked={selectedPlatforms.includes(platform)} onChange={() => setSelectedPlatforms(prev => prev.includes(platform) ? prev.filter(p => p !== platform) : [...prev, platform])} className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600" />
@@ -243,8 +243,8 @@ export default function CampaignsPage() {
                     ))}
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100">
-                    <h3 className="text-xl font-bold text-slate-800 mb-4">Select Content Format</h3>
+                  <div className="pt-4 border-t border-border">
+                    <h3 className="text-xl font-bold text-foreground mb-4">Select Content Format</h3>
                     <select
                       value={selectedFormat}
                       onChange={(e) => setSelectedFormat(e.target.value)}
@@ -256,12 +256,12 @@ export default function CampaignsPage() {
                     </select>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 text-left">
+                  <div className="pt-4 border-t border-border text-left">
                     <div className="flex items-center gap-2 mb-4">
                       <TrendingUp className="w-5 h-5 text-indigo-600" />
-                      <h3 className="text-xl font-bold text-slate-800">Augment with Trending Tags</h3>
+                      <h3 className="text-xl font-bold text-foreground">Augment with Trending Tags</h3>
                     </div>
-                    <p className="text-slate-500 mb-4 text-sm">Select live trends to inject into the AI content context.</p>
+                    <p className="text-muted-foreground mb-4 text-sm">Select live trends to inject into the AI content context.</p>
                     {trends && trends.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {trends.map((t: { id: number, title: string }) => (
@@ -270,7 +270,7 @@ export default function CampaignsPage() {
                             onClick={() => setSelectedTrends(prev => prev.includes(t.title) ? prev.filter(x => x !== t.title) : [...prev, t.title])}
                             className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all border ${selectedTrends.includes(t.title)
                                 ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
-                                : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                                : 'bg-white text-slate-600 border-border hover:border-indigo-300 hover:bg-muted'
                               }`}
                           >
                             #{t.title.replace(/\s+/g, '')}
@@ -278,15 +278,15 @@ export default function CampaignsPage() {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-sm text-slate-500 italic">Loading trends...</div>
+                      <div className="text-sm text-muted-foreground italic">Loading trends...</div>
                     )}
                   </div>
 
-                  <div className="pt-8 border-t border-slate-100">
+                  <div className="pt-8 border-t border-border">
                     <button
                       onClick={() => generateMutation.mutate({ campaignId: selectedCampaign.id, platforms: selectedPlatforms, format: selectedFormat })}
                       disabled={selectedPlatforms.length === 0}
-                      className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center mx-auto gap-2 text-lg disabled:opacity-50"
+                      className="px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center mx-auto gap-2 text-lg disabled:opacity-50"
                     >
                       <Sparkles className="w-5 h-5" /> Generate Content Variations
                     </button>
@@ -301,8 +301,8 @@ export default function CampaignsPage() {
                     <Sparkles className="w-6 h-6 text-indigo-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-bold text-slate-800">Crafting your content...</p>
-                    <p className="text-slate-500 mt-1">Applying brand guidelines and optimizing for platforms.</p>
+                    <p className="text-lg font-bold text-foreground">Crafting your content...</p>
+                    <p className="page-description">Applying brand guidelines and optimizing for platforms.</p>
                   </div>
                 </div>
               )}
@@ -311,12 +311,12 @@ export default function CampaignsPage() {
                 <div className="h-full flex flex-col md:flex-row gap-6">
                   {/* Sidebar */}
                   <div className="w-full md:w-64 flex flex-col gap-2">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Generated Variants</h4>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-2">Generated Variants</h4>
                     { }
                     {generatedContent.variants.map((v: { platform: string; status: string; id: number; content?: string; text?: string; caption?: string; }) => (
-                      <button key={v.platform} onClick={() => setActiveTab(v.platform)} className={`p-4 rounded-xl text-left border transition-all ${activeTab === v.platform ? 'bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-600' : 'bg-white/50 border-slate-200 hover:bg-white hover:border-slate-300'}`}>
+                      <button key={v.platform} onClick={() => setActiveTab(v.platform)} className={`p-4 rounded-xl text-left border transition-all ${activeTab === v.platform ? 'bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-600' : 'bg-white/50 border-border hover:bg-white hover:border-slate-300'}`}>
                         <div className="flex justify-between items-center mb-2">
-                          <div className="font-bold text-slate-800">{v.platform}</div>
+                          <div className="font-bold text-foreground">{v.platform}</div>
                           {v.status === 'APPROVED' && <CheckCircle className="w-4 h-4 text-emerald-500" />}
                           {v.status === 'SCHEDULED' && <Calendar className="w-4 h-4 text-blue-500" />}
                         </div>
@@ -326,14 +326,14 @@ export default function CampaignsPage() {
                   </div>
 
                   {/* Main Content Area */}
-                  <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                  <div className="flex-1 bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col">
                     { }
                     {generatedContent.variants.map((v: { platform: string; status: string; id: number; content?: string; text?: string; caption?: string; }) => v.platform === activeTab && (
                       <div key={v.platform} className="flex flex-col h-full">
-                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div className="p-6 border-b border-border flex justify-between items-center bg-muted/50">
                           <div className="flex items-center gap-4">
                             {getStatusBadge(v.status)}
-                            <span className="text-sm font-medium text-slate-500">Variant ID: {v.id || 'Draft'}</span>
+                            <span className="text-sm font-medium text-muted-foreground">Variant ID: {v.id || 'Draft'}</span>
                           </div>
 
                           <div className="flex items-center gap-3">
@@ -349,20 +349,20 @@ export default function CampaignsPage() {
                               </>
                             )}
                             {v.status === 'APPROVED' && (
-                              <div className="flex flex-col gap-2 bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+                              <div className="flex flex-col gap-2 bg-white border border-border rounded-lg p-3 shadow-sm">
                                 <div className="flex items-center gap-2">
-                                  <button onClick={() => handleAction('schedule', { ...v, postNow: true })} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition-colors">
+                                  <button onClick={() => handleAction('schedule', { ...v, postNow: true })} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-md hover:bg-primary-hover transition-colors">
                                     <Send className="w-4 h-4" /> Post Now
                                   </button>
                                 </div>
                                 <div className="relative flex items-center py-1">
-                                  <div className="flex-grow border-t border-slate-200"></div>
-                                  <span className="flex-shrink-0 mx-2 text-xs text-slate-400">or schedule for later</span>
-                                  <div className="flex-grow border-t border-slate-200"></div>
+                                  <div className="flex-grow border-t border-border"></div>
+                                  <span className="flex-shrink-0 mx-2 text-xs text-muted-foreground">or schedule for later</span>
+                                  <div className="flex-grow border-t border-border"></div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <input type="date" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({ ...scheduleData, date: e.target.value })} />
-                                  <input type="time" className="text-sm bg-transparent border border-slate-200 rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({ ...scheduleData, time: e.target.value })} />
+                                  <input type="date" className="text-sm bg-transparent border border-border rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({ ...scheduleData, date: e.target.value })} />
+                                  <input type="time" className="text-sm bg-transparent border border-border rounded px-2 py-1 outline-none w-full" onChange={e => setScheduleData({ ...scheduleData, time: e.target.value })} />
                                   <button onClick={() => handleAction('schedule', v)} className="flex items-center justify-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors">
                                     <Clock className="w-4 h-4" /> Schedule
                                   </button>
@@ -375,16 +375,16 @@ export default function CampaignsPage() {
                         <div className="p-8 flex-1 overflow-y-auto">
                           <div className="max-w-2xl mx-auto space-y-8">
                             <div>
-                              <h4 className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
+                              <h4 className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">
                                 <MessageSquare className="w-4 h-4" /> Post Content
                               </h4>
-                              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner font-medium">
+                              <div className="bg-muted p-6 rounded-2xl border border-border text-foreground whitespace-pre-wrap leading-relaxed shadow-inner font-medium">
                                 {v.content || v.text || 'No content generated yet.'}
                               </div>
                             </div>
                             {v.caption && (
                               <div>
-                                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Image Prompt / Caption</h4>
+                                <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Image Prompt / Caption</h4>
                                 <div className="bg-amber-50 p-5 rounded-2xl border border-amber-100 text-amber-900 italic">
                                   {v.caption}
                                 </div>
@@ -399,12 +399,12 @@ export default function CampaignsPage() {
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 bg-white flex justify-between items-center rounded-b-2xl">
-              <span className="text-sm text-slate-500 flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-400" /> AI-generated content follows Brand Guardrails</span>
+            <div className="px-6 py-4 border-t border-border bg-white flex justify-between items-center rounded-b-2xl">
+              <span className="text-sm text-muted-foreground flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-400" /> AI-generated content follows Brand Guardrails</span>
               <div className="flex space-x-3">
-                <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); setSelectedTrends([]); }} className="px-5 py-2.5 text-slate-700 font-medium hover:bg-slate-100 rounded-lg transition-colors">Close Workspace</button>
+                <button onClick={() => { setSelectedCampaign(null); setGeneratedContent(null); setSelectedTrends([]); }} className="px-5 py-2.5 text-slate-700 font-medium hover:bg-muted rounded-lg transition-colors">Close Workspace</button>
                 {!generatedContent && (
-                  <button onClick={() => generateMutation.mutate({ campaignId: selectedCampaign.id, platforms: selectedPlatforms, format: selectedFormat })} disabled={generateMutation.isPending || selectedPlatforms.length === 0} className="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center gap-2">
+                  <button onClick={() => generateMutation.mutate({ campaignId: selectedCampaign.id, platforms: selectedPlatforms, format: selectedFormat })} disabled={generateMutation.isPending || selectedPlatforms.length === 0} className="px-6 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center gap-2">
                     Generate Flow <ArrowRight className="w-4 h-4" />
                   </button>
                 )}
@@ -416,42 +416,43 @@ export default function CampaignsPage() {
 
       {/* Campaigns Table */}
       {!isCreating && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
-          <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h3 className="font-bold text-slate-800">Active Campaigns</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow">
+          <div className="px-6 py-5 border-b border-border bg-muted/50 flex justify-between items-center">
+            <h3 className="font-bold text-foreground">Active Campaigns</h3>
           </div>
 
           {isLoading ? (
             <div className="p-6 space-y-4">
-              {[1, 2, 3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}
+              {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded-xl animate-pulse" />)}
             </div>
           ) : campaigns?.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
+            <div className="p-12 text-center text-muted-foreground">
               No campaigns found. Create your first campaign to get started!
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-100">
-                <thead className="bg-slate-50">
+            <div className="overflow-x-auto app-scrollbar max-w-full">
+              <div className="app-table-container">
+<table className="app-table">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Campaign Name</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Objective</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">Campaign Name</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">Objective</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-muted-foreground uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-50">
                   {campaigns?.map((campaign: Campaign) => (
-                    <tr key={campaign.id} className="hover:bg-slate-50/80 transition-colors group">
+                    <tr key={campaign.id} className="hover:bg-muted/80 transition-colors group">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{campaign.name}</div>
-                        <div className="text-sm text-slate-500">{campaign.topic || 'No topic'}</div>
+                        <div className="font-bold text-foreground group-hover:text-indigo-600 transition-colors">{campaign.name}</div>
+                        <div className="text-sm text-muted-foreground">{campaign.topic || 'No topic'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium">
                         {campaign.objective || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-slate-100 text-slate-600 border border-slate-200">ACTIVE</span>
+                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-muted text-slate-600 border border-border">ACTIVE</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                         <button onClick={() => setSelectedCampaign(campaign)} className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 hover:shadow-sm transition-all">
@@ -462,12 +463,13 @@ export default function CampaignsPage() {
                   ))}
                 </tbody>
               </table>
+</div>
             </div>
           )}
         </div>
       )}
 
-      <div className="flex items-center space-x-2 pt-6 pb-2 text-sm text-slate-500 font-medium justify-center">
+      <div className="flex items-center space-x-2 pt-6 pb-2 text-sm text-muted-foreground font-medium justify-center">
         {celeryHealth?.status === 'active' ? (
           <><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
             <Activity className="w-4 h-4 text-emerald-600" />

@@ -8,10 +8,12 @@ from app.services.connectors.mock.mock_connector import mock_connector
 logger = logging.getLogger(__name__)
 
 class LinkedInConnector(SocialConnector):
-    def __init__(self):
+    def __init__(self, access_token=None, external_account_id=None):
         from dotenv import load_dotenv
         load_dotenv()
-        self.access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
+        self.access_token = access_token or os.getenv("LINKEDIN_ACCESS_TOKEN")
+        self.person_urn = external_account_id or os.getenv("LINKEDIN_PERSON_URN")
+        self.organization_urn = external_account_id or os.getenv("LINKEDIN_ORGANIZATION_URN")
         
     def _has_credentials(self) -> bool:
         return bool(self.access_token)

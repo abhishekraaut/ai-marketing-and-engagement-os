@@ -1,10 +1,10 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  
+
   const headers = {
     'Content-Type': 'application/json',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
@@ -37,7 +37,7 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 export async function downloadAPI(endpoint: string, filename: string) {
   const url = `${API_BASE_URL}${endpoint}`;
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  
+
   const headers = {
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
   };
@@ -135,12 +135,12 @@ export interface BrandProfile {
 
 export const brandApi = {
   getBrandProfile: (orgId: number) => fetchAPI(`/organizations/${orgId}/brand`),
-  createBrandProfile: (orgId: number, data: BrandProfile) => 
+  createBrandProfile: (orgId: number, data: BrandProfile) =>
     fetchAPI(`/organizations/${orgId}/brand`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-  updateBrandProfile: (orgId: number, data: Partial<BrandProfile>) => 
+  updateBrandProfile: (orgId: number, data: Partial<BrandProfile>) =>
     fetchAPI(`/organizations/${orgId}/brand`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -162,10 +162,15 @@ export interface SocialAccount {
 
 export const socialAccountsApi = {
   getAccounts: (orgId: number) => fetchAPI(`/organizations/${orgId}/social-accounts`),
-  connectAccount: (orgId: number, data: { platform: string; external_account_id: string; account_name?: string }) => 
+  connectAccount: (orgId: number, data: { platform: string; external_account_id: string; account_name?: string }) =>
     fetchAPI(`/organizations/${orgId}/social-accounts`, {
       method: 'POST',
       body: JSON.stringify(data),
+    }),
+  connectMetaAccount: (orgId: number, accessToken: string) =>
+    fetchAPI(`/organizations/${orgId}/meta/connect`, {
+      method: 'POST',
+      body: JSON.stringify({ access_token: accessToken }),
     }),
 };
 
@@ -191,12 +196,12 @@ export interface Campaign {
 
 export const campaignsApi = {
   getCampaigns: (orgId: number) => fetchAPI(`/organizations/${orgId}/campaigns`),
-  createCampaign: (orgId: number, data: Partial<Campaign>) => 
+  createCampaign: (orgId: number, data: Partial<Campaign>) =>
     fetchAPI(`/organizations/${orgId}/campaigns`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-  updateCampaign: (orgId: number, campaignId: number, data: Partial<Campaign>) => 
+  updateCampaign: (orgId: number, campaignId: number, data: Partial<Campaign>) =>
     fetchAPI(`/organizations/${orgId}/campaigns/${campaignId}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -345,13 +350,13 @@ export interface PlatformMetric {
 }
 
 export interface AnalyticsOverview {
-  total_impressions: number;
-  total_engagements: number;
-  total_clicks: number;
+  impressions: number;
+  reach: number;
+  engagements: number;
+  clicks: number;
   engagement_rate: number;
-  impressions_growth: number;
-  engagements_growth: number;
-  clicks_growth: number;
+  posts_published: number;
+  followers: number;
 }
 
 export const engagementApi = {

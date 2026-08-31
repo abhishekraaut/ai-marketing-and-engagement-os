@@ -10,30 +10,63 @@ class AnalyticsAggregator:
             func.sum(AnalyticsSnapshot.reach).label('reach'),
             func.sum(AnalyticsSnapshot.likes + AnalyticsSnapshot.comments + AnalyticsSnapshot.shares).label('engagements'),
             func.sum(AnalyticsSnapshot.clicks).label('clicks')
-        ).filter(AnalyticsSnapshot.organization_id == org_id)
+        ).filter(AnalyticsSnapshot.organization_id == org_id, AnalyticsSnapshot.published_post_id != None)
 
         if start_date: query = query.filter(AnalyticsSnapshot.snapshot_date >= start_date)
         if end_date: query = query.filter(AnalyticsSnapshot.snapshot_date <= end_date)
         if platform: query = query.filter(AnalyticsSnapshot.platform == platform)
         
-        # Determine latest snapshot per post for unique counts (simplification for prototype)
-        # We'll just take the absolute sum. In reality we'd need MAX per post.
         res = query.one()
         
         imp = res.impressions or 0
         eng = res.engagements or 0
         
-        posts_query = db.query(func.count(func.distinct(AnalyticsSnapshot.published_post_id))).filter(AnalyticsSnapshot.organization_id == org_id)
+        posts_query = db.query(func.count(func.distinct(AnalyticsSnapshot.published_post_id))).filter(AnalyticsSnapshot.organization_id == org_id, AnalyticsSnapshot.published_post_id != None)
         if start_date: posts_query = posts_query.filter(AnalyticsSnapshot.snapshot_date >= start_date)
+        if platform: posts_query = posts_query.filter(AnalyticsSnapshot.platform == platform)
+
+        # Get latest followers from Page-Level snapshots
+        followers_query = db.query(AnalyticsSnapshot.platform, AnalyticsSnapshot.followers).filter(
+            AnalyticsSnapshot.organization_id == org_id,
+            AnalyticsSnapshot.published_post_id == None
+        ).order_by(AnalyticsSnapshot.snapshot_date.desc())
         
+        if platform:
+            followers_query = followers_query.filter(AnalyticsSnapshot.platform == platform)
+            
+        followers = 0
+        seen_platforms = set()
+        for snap in followers_query.all():
+            if snap.platform not in seen_platforms:
+                followers += (snap.followers or 0)
+                seen_platforms.add(snap.platform)
+
+        # Let's also include page_reach from page-level snapshots if available
+        page_reach_query = db.query(AnalyticsSnapshot.platform, AnalyticsSnapshot.reach).filter(
+            AnalyticsSnapshot.organization_id == org_id,
+            AnalyticsSnapshot.published_post_id == None
+        ).order_by(AnalyticsSnapshot.snapshot_date.desc())
+        
+        if platform:
+            page_reach_query = page_reach_query.filter(AnalyticsSnapshot.platform == platform)
+            
+        page_reach = 0
+        seen_platforms = set()
+        for snap in page_reach_query.all():
+            if snap.platform not in seen_platforms:
+                page_reach += (snap.reach or 0)
+                seen_platforms.add(snap.platform)
+
         return {
             "impressions": imp,
-            "reach": res.reach or 0,
+            "reach": page_reach or res.reach or 0,
             "engagements": eng,
             "clicks": res.clicks or 0,
             "engagement_rate": round((eng / imp * 100) if imp > 0 else 0, 2),
-            "posts_published": posts_query.scalar() or 0
+            "posts_published": posts_query.scalar() or 0,
+            "followers": followers
         }
+
 
     def get_trends(self, db: Session, org_id: int, start_date: datetime = None, end_date: datetime = None) -> list:
         # Group by date part

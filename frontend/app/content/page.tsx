@@ -72,49 +72,49 @@ export default function ContentPage() {
     <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Post Composer</h1>
-          <p className="text-slate-500 mt-1">Create and publish content across multiple platforms simultaneously.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Post Composer</h1>
+          <p className="page-description">Create and publish content across multiple platforms simultaneously.</p>
         </div>
       </div>
 
-      <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm space-y-8">
+      <div className="bg-white p-8 rounded-xl border border-border shadow-sm space-y-8">
         
         {/* Title */}
         <div>
-          <label className="block text-sm font-semibold text-slate-900 mb-2">Campaign / Post Title</label>
+          <label className="block text-sm font-semibold text-foreground mb-2">Campaign / Post Title</label>
           <input 
             type="text" 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all"
+            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all"
             placeholder="e.g. Summer Sale Announcement"
           />
         </div>
 
         {/* Caption */}
         <div>
-          <label className="block text-sm font-semibold text-slate-900 mb-2">Caption / Body</label>
+          <label className="block text-sm font-semibold text-foreground mb-2">Caption / Body</label>
           <textarea 
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all min-h-[150px]"
+            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all min-h-[150px]"
             placeholder="Write your post caption here..."
           />
         </div>
 
         {/* Media */}
-        <div className="space-y-4 p-4 border border-slate-100 bg-slate-50 rounded-xl">
-          <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-            <ImageIcon className="w-4 h-4 text-slate-500" />
+        <div className="space-y-4 p-4 border border-border bg-muted rounded-xl">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <ImageIcon className="w-4 h-4 text-muted-foreground" />
             Media & Formats
           </h3>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Media URL (Optional)</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Media URL (Optional)</label>
             <input 
               type="text" 
               value={mediaUrl}
               onChange={(e) => setMediaUrl(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full bg-white border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
               placeholder="https://example.com/image.jpg"
             />
           </div>
@@ -126,7 +126,7 @@ export default function ContentPage() {
                 onChange={(e) => setIsReel(e.target.checked)}
                 className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" 
               />
-              <Video className="w-4 h-4 text-slate-400" />
+              <Video className="w-4 h-4 text-muted-foreground" />
               Publish as Short/Reel (requires video URL)
             </label>
           </div>
@@ -134,9 +134,9 @@ export default function ContentPage() {
 
         {/* Accounts Selection */}
         <div>
-          <label className="block text-sm font-semibold text-slate-900 mb-3">Publish To Accounts</label>
+          <label className="block text-sm font-semibold text-foreground mb-3">Publish To Accounts</label>
           {accountsLoading ? (
-            <div className="animate-pulse h-12 bg-slate-100 rounded-lg w-full" />
+            <div className="animate-pulse h-12 bg-muted rounded-lg w-full" />
           ) : !accounts || accounts.length === 0 ? (
             <div className="p-4 bg-amber-50 text-amber-800 rounded-lg text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
@@ -154,7 +154,7 @@ export default function ContentPage() {
                       "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
                       isSelected 
                         ? "bg-indigo-50 border-indigo-200 shadow-sm" 
-                        : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                        : "bg-white border-border hover:border-slate-300 hover:bg-muted"
                     )}
                   >
                     <div className={cn(
@@ -164,8 +164,8 @@ export default function ContentPage() {
                       {isSelected && <CheckCircle2 className="w-3 h-3" />}
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-slate-900 leading-tight">{acc.account_name || 'Account'}</div>
-                      <div className="text-xs font-semibold text-slate-500">{acc.platform}</div>
+                      <div className="text-sm font-bold text-foreground leading-tight">{acc.account_name || 'Account'}</div>
+                      <div className="text-xs font-semibold text-muted-foreground">{acc.platform}</div>
                     </div>
                   </div>
                 );
@@ -175,11 +175,11 @@ export default function ContentPage() {
         </div>
 
         {/* Submit */}
-        <div className="pt-6 border-t border-slate-100 flex justify-end">
+        <div className="pt-6 border-t border-border flex justify-end">
           <button 
             onClick={handlePublish}
             disabled={publishMutation.isPending || selectedAccounts.length === 0}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-hover transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
             {publishMutation.isPending ? 'Publishing...' : 'Publish Post Now'}
